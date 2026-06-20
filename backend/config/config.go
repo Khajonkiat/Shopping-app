@@ -8,13 +8,17 @@ import (
 )
 
 type Config struct {
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	DBSSLMode  string
-	ServerPort string
+	DBHost          string
+	DBPort          string
+	DBUser          string
+	DBPassword      string
+	DBName          string
+	DBSSLMode       string
+	ServerPort      string
+	JWTSecret       string
+	MasterEmail     string
+	MasterUsername  string
+	MasterPassword  string
 }
 
 func (c *Config) DSN() string {
@@ -27,13 +31,17 @@ func (c *Config) DSN() string {
 func Load() *Config {
 	_ = godotenv.Load()
 	return &Config{
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", "postgres"),
-		DBName:     getEnv("DB_NAME", "wiki_shopping"),
-		DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
-		ServerPort: getEnv("SERVER_PORT", "8080"),
+		DBHost:         getEnv("DB_HOST", "localhost"),
+		DBPort:         getEnv("DB_PORT", "5432"),
+		DBUser:         getEnv("DB_USER", "postgres"),
+		DBPassword:     getEnv("DB_PASSWORD", "postgres"),
+		DBName:         getEnv("DB_NAME", "wiki_shopping"),
+		DBSSLMode:      getEnv("DB_SSLMODE", "disable"),
+		ServerPort:     getEnv("SERVER_PORT", "8080"),
+		JWTSecret:      getEnv("JWT_SECRET", "change-me-in-production"),
+		MasterEmail:    getEnv("MASTER_EMAIL", ""),
+		MasterUsername: getEnv("MASTER_USERNAME", "master"),
+		MasterPassword: getEnv("MASTER_PASSWORD", ""),
 	}
 }
 

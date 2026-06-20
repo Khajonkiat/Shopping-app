@@ -86,4 +86,18 @@ export const en: Translations = {
     totalSuffix: "total",
     noData: "No purchases yet — record one above.",
   },
+  auth: {
+    login: "Log in",
+    register: "Register",
+    logout: "Log out",
+    email: "Email",
+    username: "Username",
+    password: "Password",
+    loginTitle: "Sign in to your account",
+    registerTitle: "Create an account",
+    noAccount: "Don't have an account?",
+    hasAccount: "Already have an account?",
+    loginError: "Invalid email or password.",
+    registerError: "Could not create account.",
+  },
 };

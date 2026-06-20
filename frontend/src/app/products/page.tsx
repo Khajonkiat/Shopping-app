@@ -5,11 +5,15 @@ import { card, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/li
 import type { Product } from "@/lib/types";
 import Link from "next/link";
 import { useLocale } from "@/components/locale-provider";
+import { useRequireAuth } from "@/lib/use-require-auth";
+import { useAuth } from "@/lib/auth";
 
 const emptyForm = { name: "", category: "", unit: "", description: "" };
 
 export default function ProductsPage() {
   const { t } = useLocale();
+  const { ready } = useRequireAuth();
+  const { isMaster } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -68,6 +72,8 @@ export default function ProductsPage() {
     if (editingId === id) cancelEdit();
   }
 
+  if (!ready) return null;
+
   return (
     <div className="space-y-8">
       <div className="flex items-start justify-between">
@@ -75,12 +81,14 @@ export default function ProductsPage() {
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{t.products.title}</h1>
           <p className="text-sm text-slate-500 mt-1">{products.length} {products.length === 1 ? "item" : "items"}</p>
         </div>
-        <button
-          className={showForm ? btnSecondary : btnPrimary}
-          onClick={() => { setShowForm((v) => !v); cancelEdit(); }}
-        >
-          {showForm ? t.common.cancel : t.products.addButton}
-        </button>
+        {isMaster && (
+          <button
+            className={showForm ? btnSecondary : btnPrimary}
+            onClick={() => { setShowForm((v) => !v); cancelEdit(); }}
+          >
+            {showForm ? t.common.cancel : t.products.addButton}
+          </button>
+        )}
       </div>
 
       {showForm && (
@@ -189,19 +197,21 @@ export default function ProductsPage() {
                 </td>
                 <td className={`${td} text-slate-500`}>{p.category || <span className="text-slate-300">—</span>}</td>
                 <td className={`${td} text-slate-500`}>{p.unit || <span className="text-slate-300">—</span>}</td>
-                <td className={`${td} text-right`}>
-                  <div className="flex items-center justify-end gap-3">
-                    <button
-                      onClick={() => editingId === p.id ? cancelEdit() : startEdit(p)}
-                      className={`text-xs font-medium transition-colors ${editingId === p.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
-                    >
-                      {editingId === p.id ? t.common.cancel : t.common.edit}
-                    </button>
-                    <button onClick={() => handleDelete(p.id)} className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors">
-                      {t.common.delete}
-                    </button>
-                  </div>
-                </td>
+                {isMaster && (
+                  <td className={`${td} text-right`}>
+                    <div className="flex items-center justify-end gap-3">
+                      <button
+                        onClick={() => editingId === p.id ? cancelEdit() : startEdit(p)}
+                        className={`text-xs font-medium transition-colors ${editingId === p.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
+                      >
+                        {editingId === p.id ? t.common.cancel : t.common.edit}
+                      </button>
+                      <button onClick={() => handleDelete(p.id)} className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors">
+                        {t.common.delete}
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
               );
             })}

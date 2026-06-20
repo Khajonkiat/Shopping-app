@@ -6,6 +6,8 @@ import { api, imageUrl } from "@/lib/api";
 import { card, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/lib/styles";
 import type { PriceEntry, Product, ProductImage, Purchase, Store } from "@/lib/types";
 import { useLocale } from "@/components/locale-provider";
+import { useRequireAuth } from "@/lib/use-require-auth";
+import { useAuth } from "@/lib/auth";
 
 function toISO(dateStr: string): string | undefined {
   return dateStr ? `${dateStr}T00:00:00Z` : undefined;
@@ -18,6 +20,8 @@ function toDateInput(iso: string | undefined): string {
 
 export default function ProductDetailPage() {
   const { t } = useLocale();
+  const { ready } = useRequireAuth();
+  const { isMaster } = useAuth();
   const { id } = useParams<{ id: string }>();
   const productId = Number(id);
 
@@ -247,7 +251,7 @@ export default function ProductDetailPage() {
     .filter(Boolean)
     .sort((a, b) => a!.price - b!.price) as { store: Store; price: number }[];
 
-  if (!product) {
+  if (!ready || !product) {
     return (
       <div className="flex items-center justify-center h-48">
         <p className="text-slate-400 text-sm">{t.common.loading}</p>
@@ -338,14 +342,16 @@ export default function ProductDetailPage() {
       {/* Prices tab */}
       {tab === "prices" && (
         <div className="space-y-5">
-          <div className="flex justify-end">
-            <button
-              className={showPriceForm ? btnSecondary : btnPrimary}
-              onClick={() => { setShowPriceForm((v) => !v); setPriceError(null); cancelEditPrice(); }}
-            >
-              {showPriceForm ? t.common.cancel : t.productDetail.recordPrice}
-            </button>
-          </div>
+          {isMaster && (
+            <div className="flex justify-end">
+              <button
+                className={showPriceForm ? btnSecondary : btnPrimary}
+                onClick={() => { setShowPriceForm((v) => !v); setPriceError(null); cancelEditPrice(); }}
+              >
+                {showPriceForm ? t.common.cancel : t.productDetail.recordPrice}
+              </button>
+            </div>
+          )}
 
           {showPriceForm && (
             <div className={`${card} p-6`}>
@@ -501,26 +507,28 @@ export default function ProductDetailPage() {
                         {p.source_type === "scraped" ? t.productDetail.sourceScraped : t.productDetail.sourceManual}
                       </span>
                     </td>
-                    <td className={`${td} text-right`}>
-                      <div className="flex items-center justify-end gap-3">
-                        <button
-                          onClick={() => editingPriceId === p.id ? cancelEditPrice() : startEditPrice(p)}
-                          className={`text-xs font-medium transition-colors ${editingPriceId === p.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
-                        >
-                          {editingPriceId === p.id ? t.common.cancel : t.common.edit}
-                        </button>
-                        <button
-                          onClick={async () => {
-                            await api.prices.delete(p.id);
-                            setPrices((prev) => prev.filter((x) => x.id !== p.id));
-                            if (editingPriceId === p.id) cancelEditPrice();
-                          }}
-                          className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors"
-                        >
-                          {t.common.delete}
-                        </button>
-                      </div>
-                    </td>
+                    {isMaster && (
+                      <td className={`${td} text-right`}>
+                        <div className="flex items-center justify-end gap-3">
+                          <button
+                            onClick={() => editingPriceId === p.id ? cancelEditPrice() : startEditPrice(p)}
+                            className={`text-xs font-medium transition-colors ${editingPriceId === p.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
+                          >
+                            {editingPriceId === p.id ? t.common.cancel : t.common.edit}
+                          </button>
+                          <button
+                            onClick={async () => {
+                              await api.prices.delete(p.id);
+                              setPrices((prev) => prev.filter((x) => x.id !== p.id));
+                              if (editingPriceId === p.id) cancelEditPrice();
+                            }}
+                            className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors"
+                          >
+                            {t.common.delete}
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -532,14 +540,16 @@ export default function ProductDetailPage() {
       {/* Purchases tab */}
       {tab === "purchases" && (
         <div className="space-y-5">
-          <div className="flex justify-end">
-            <button
-              className={showPurchaseForm ? btnSecondary : btnPrimary}
-              onClick={() => { setShowPurchaseForm((v) => !v); setPurchaseError(null); cancelEditPurchase(); }}
-            >
-              {showPurchaseForm ? t.common.cancel : t.productDetail.recordPurchase}
-            </button>
-          </div>
+          {isMaster && (
+            <div className="flex justify-end">
+              <button
+                className={showPurchaseForm ? btnSecondary : btnPrimary}
+                onClick={() => { setShowPurchaseForm((v) => !v); setPurchaseError(null); cancelEditPurchase(); }}
+              >
+                {showPurchaseForm ? t.common.cancel : t.productDetail.recordPurchase}
+              </button>
+            </div>
+          )}
 
           {showPurchaseForm && (
             <div className={`${card} p-6`}>
@@ -729,26 +739,28 @@ export default function ProductDetailPage() {
                     <td className={`${td} font-semibold text-slate-900`}>฿{(p.price * p.quantity).toFixed(2)}</td>
                     <td className={`${td} text-slate-400`}>{new Date(p.purchased_at).toLocaleDateString()}</td>
                     <td className={`${td} text-slate-400`}>{p.notes || <span className="text-slate-300">—</span>}</td>
-                    <td className={`${td} text-right`}>
-                      <div className="flex items-center justify-end gap-3">
-                        <button
-                          onClick={() => editingPurchaseId === p.id ? cancelEditPurchase() : startEditPurchase(p)}
-                          className={`text-xs font-medium transition-colors ${editingPurchaseId === p.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
-                        >
-                          {editingPurchaseId === p.id ? t.common.cancel : t.common.edit}
-                        </button>
-                        <button
-                          onClick={async () => {
-                            await api.purchases.delete(p.id);
-                            setPurchases((prev) => prev.filter((x) => x.id !== p.id));
-                            if (editingPurchaseId === p.id) cancelEditPurchase();
-                          }}
-                          className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors"
-                        >
-                          {t.common.delete}
-                        </button>
-                      </div>
-                    </td>
+                    {isMaster && (
+                      <td className={`${td} text-right`}>
+                        <div className="flex items-center justify-end gap-3">
+                          <button
+                            onClick={() => editingPurchaseId === p.id ? cancelEditPurchase() : startEditPurchase(p)}
+                            className={`text-xs font-medium transition-colors ${editingPurchaseId === p.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
+                          >
+                            {editingPurchaseId === p.id ? t.common.cancel : t.common.edit}
+                          </button>
+                          <button
+                            onClick={async () => {
+                              await api.purchases.delete(p.id);
+                              setPurchases((prev) => prev.filter((x) => x.id !== p.id));
+                              if (editingPurchaseId === p.id) cancelEditPurchase();
+                            }}
+                            className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors"
+                          >
+                            {t.common.delete}
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -762,16 +774,18 @@ export default function ProductDetailPage() {
         <div className="space-y-5">
           <div className="flex items-center justify-between">
             <p className="text-sm text-slate-500">{images.length} {t.productDetail.imagesTab}</p>
-            <label className={`${btnPrimary} cursor-pointer`}>
-              {imageUploading ? "Uploading…" : t.productDetail.uploadImage}
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/gif,image/webp"
-                className="hidden"
-                disabled={imageUploading}
-                onChange={handleImageUpload}
-              />
-            </label>
+            {isMaster && (
+              <label className={`${btnPrimary} cursor-pointer`}>
+                {imageUploading ? "Uploading…" : t.productDetail.uploadImage}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  className="hidden"
+                  disabled={imageUploading}
+                  onChange={handleImageUpload}
+                />
+              </label>
+            )}
           </div>
 
           {imageError && (
@@ -795,12 +809,14 @@ export default function ProductDetailPage() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <button
-                    onClick={() => handleImageDelete(img)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-rose-50 text-rose-500 rounded-lg px-2 py-1 text-xs font-medium shadow-sm border border-rose-100"
-                  >
-                    {t.common.delete}
-                  </button>
+                  {isMaster && (
+                    <button
+                      onClick={() => handleImageDelete(img)}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-rose-50 text-rose-500 rounded-lg px-2 py-1 text-xs font-medium shadow-sm border border-rose-100"
+                    >
+                      {t.common.delete}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

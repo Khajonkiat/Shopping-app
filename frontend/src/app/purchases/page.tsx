@@ -4,6 +4,8 @@ import { api } from "@/lib/api";
 import { card, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/lib/styles";
 import type { Product, Purchase, Store } from "@/lib/types";
 import { useLocale } from "@/components/locale-provider";
+import { useRequireAuth } from "@/lib/use-require-auth";
+import { useAuth } from "@/lib/auth";
 
 function toISO(dateStr: string): string | undefined {
   return dateStr ? `${dateStr}T00:00:00Z` : undefined;
@@ -18,6 +20,8 @@ const emptyForm = { product_id: "", store_id: "", price: "", quantity: "1", purc
 
 export default function PurchasesPage() {
   const { t } = useLocale();
+  const { ready } = useRequireAuth();
+  const { isMaster } = useAuth();
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Store[]>([]);
@@ -119,6 +123,8 @@ export default function PurchasesPage() {
 
   const totalSpend = purchases.reduce((sum, p) => sum + p.price * p.quantity, 0);
 
+  if (!ready) return null;
+
   return (
     <div className="space-y-8">
       <div className="flex items-start justify-between">
@@ -136,12 +142,14 @@ export default function PurchasesPage() {
             <p className="text-sm text-slate-400 mt-1">0 {t.purchases.recordsSuffix}</p>
           )}
         </div>
-        <button
-          className={showForm ? btnSecondary : btnPrimary}
-          onClick={() => { setShowForm((v) => !v); setError(null); cancelEdit(); }}
-        >
-          {showForm ? t.common.cancel : t.purchases.recordButton}
-        </button>
+        {isMaster && (
+          <button
+            className={showForm ? btnSecondary : btnPrimary}
+            onClick={() => { setShowForm((v) => !v); setError(null); cancelEdit(); }}
+          >
+            {showForm ? t.common.cancel : t.purchases.recordButton}
+          </button>
+        )}
       </div>
 
       {showForm && (
@@ -360,26 +368,28 @@ export default function PurchasesPage() {
                 <td className={`${td} font-semibold text-slate-900`}>฿{(p.price * p.quantity).toFixed(2)}</td>
                 <td className={`${td} text-slate-400`}>{new Date(p.purchased_at).toLocaleDateString()}</td>
                 <td className={`${td} text-slate-400`}>{p.notes || <span className="text-slate-300">—</span>}</td>
-                <td className={`${td} text-right`}>
-                  <div className="flex items-center justify-end gap-3">
-                    <button
-                      onClick={() => editingId === p.id ? cancelEdit() : startEdit(p)}
-                      className={`text-xs font-medium transition-colors ${editingId === p.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
-                    >
-                      {editingId === p.id ? t.common.cancel : t.common.edit}
-                    </button>
-                    <button
-                      onClick={async () => {
-                        await api.purchases.delete(p.id);
-                        setPurchases((prev) => prev.filter((x) => x.id !== p.id));
-                        if (editingId === p.id) cancelEdit();
-                      }}
-                      className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors"
-                    >
-                      {t.common.delete}
-                    </button>
-                  </div>
-                </td>
+                {isMaster && (
+                  <td className={`${td} text-right`}>
+                    <div className="flex items-center justify-end gap-3">
+                      <button
+                        onClick={() => editingId === p.id ? cancelEdit() : startEdit(p)}
+                        className={`text-xs font-medium transition-colors ${editingId === p.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
+                      >
+                        {editingId === p.id ? t.common.cancel : t.common.edit}
+                      </button>
+                      <button
+                        onClick={async () => {
+                          await api.purchases.delete(p.id);
+                          setPurchases((prev) => prev.filter((x) => x.id !== p.id));
+                          if (editingId === p.id) cancelEdit();
+                        }}
+                        className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors"
+                      >
+                        {t.common.delete}
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

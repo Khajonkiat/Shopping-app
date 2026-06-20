@@ -15,6 +15,7 @@ func Connect(cfg *config.Config) (*gorm.DB, error) {
 	}
 
 	if err := db.AutoMigrate(
+		&model.User{},
 		&model.Product{},
 		&model.Store{},
 		&model.PriceEntry{},

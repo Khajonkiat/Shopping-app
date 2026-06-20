@@ -5,9 +5,11 @@ import { card, th, td } from "@/lib/styles";
 import type { Product, Purchase, Store } from "@/lib/types";
 import Link from "next/link";
 import { useLocale } from "@/components/locale-provider";
+import { useRequireAuth } from "@/lib/use-require-auth";
 
 export default function Dashboard() {
   const { t } = useLocale();
+  const { ready } = useRequireAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Store[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
@@ -21,7 +23,7 @@ export default function Dashboard() {
   const totalSpend = purchases.reduce((sum, p) => sum + p.price * p.quantity, 0);
   const recent = purchases.slice(0, 5);
 
-  if (loading) {
+  if (!ready || loading) {
     return (
       <div className="flex items-center justify-center h-48">
         <p className="text-slate-400 text-sm">{t.common.loading}</p>

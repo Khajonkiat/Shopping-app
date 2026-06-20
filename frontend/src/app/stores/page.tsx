@@ -4,11 +4,15 @@ import { api } from "@/lib/api";
 import { card, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/lib/styles";
 import type { Store } from "@/lib/types";
 import { useLocale } from "@/components/locale-provider";
+import { useRequireAuth } from "@/lib/use-require-auth";
+import { useAuth } from "@/lib/auth";
 
 const emptyForm = { name: "", base_url: "" };
 
 export default function StoresPage() {
   const { t } = useLocale();
+  const { ready } = useRequireAuth();
+  const { isMaster } = useAuth();
   const [stores, setStores] = useState<Store[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -52,6 +56,8 @@ export default function StoresPage() {
     if (editingId === id) cancelEdit();
   }
 
+  if (!ready) return null;
+
   return (
     <div className="space-y-8">
       <div className="flex items-start justify-between">
@@ -59,12 +65,14 @@ export default function StoresPage() {
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{t.stores.title}</h1>
           <p className="text-sm text-slate-500 mt-1">{stores.length} {stores.length === 1 ? "store" : "stores"}</p>
         </div>
-        <button
-          className={showForm ? btnSecondary : btnPrimary}
-          onClick={() => { setShowForm((v) => !v); cancelEdit(); }}
-        >
-          {showForm ? t.common.cancel : t.stores.addButton}
-        </button>
+        {isMaster && (
+          <button
+            className={showForm ? btnSecondary : btnPrimary}
+            onClick={() => { setShowForm((v) => !v); cancelEdit(); }}
+          >
+            {showForm ? t.common.cancel : t.stores.addButton}
+          </button>
+        )}
       </div>
 
       {showForm && (
@@ -144,19 +152,21 @@ export default function StoresPage() {
                     </a>
                   ) : <span className="text-slate-300 text-sm">—</span>}
                 </td>
-                <td className={`${td} text-right`}>
-                  <div className="flex items-center justify-end gap-3">
-                    <button
-                      onClick={() => editingId === s.id ? cancelEdit() : startEdit(s)}
-                      className={`text-xs font-medium transition-colors ${editingId === s.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
-                    >
-                      {editingId === s.id ? t.common.cancel : t.common.edit}
-                    </button>
-                    <button onClick={() => handleDelete(s.id)} className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors">
-                      {t.common.delete}
-                    </button>
-                  </div>
-                </td>
+                {isMaster && (
+                  <td className={`${td} text-right`}>
+                    <div className="flex items-center justify-end gap-3">
+                      <button
+                        onClick={() => editingId === s.id ? cancelEdit() : startEdit(s)}
+                        className={`text-xs font-medium transition-colors ${editingId === s.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
+                      >
+                        {editingId === s.id ? t.common.cancel : t.common.edit}
+                      </button>
+                      <button onClick={() => handleDelete(s.id)} className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors">
+                        {t.common.delete}
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

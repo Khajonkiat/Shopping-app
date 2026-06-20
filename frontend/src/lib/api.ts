@@ -9,11 +9,20 @@ export function imageUrl(filename: string): string {
   return `${SERVER_ORIGIN}/uploads/${filename}`;
 }
 
+function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("auth_token");
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
+  const token = getToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options?.headers as Record<string, string>),
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`API ${res.status}: ${body}`);
@@ -22,7 +31,25 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export interface AuthResponse {
+  token: string;
+  user: { id: number; email: string; username: string; role: "master" | "user" };
+}
+
 export const api = {
+  auth: {
+    register: (email: string, username: string, password: string) =>
+      request<AuthResponse>("/auth/register", {
+        method: "POST",
+        body: JSON.stringify({ email, username, password }),
+      }),
+    login: (email: string, password: string) =>
+      request<AuthResponse>("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      }),
+  },
+
   products: {
     list: () => request<Product[]>("/products"),
     get: (id: number) => request<Product>(`/products/${id}`),
@@ -92,10 +119,14 @@ export const api = {
     list: (productId: number) =>
       request<ProductImage[]>(`/products/${productId}/images`),
     upload: async (productId: number, file: File): Promise<ProductImage> => {
+      const token = getToken();
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
       const body = new FormData();
       body.append("image", file);
       const res = await fetch(`${BASE_URL}/products/${productId}/images`, {
         method: "POST",
+        headers,
         body,
       });
       if (!res.ok) {

@@ -88,4 +88,18 @@ export interface Translations {
     totalSuffix: string;
     noData: string;
   };
+  auth: {
+    login: string;
+    register: string;
+    logout: string;
+    email: string;
+    username: string;
+    password: string;
+    loginTitle: string;
+    registerTitle: string;
+    noAccount: string;
+    hasAccount: string;
+    loginError: string;
+    registerError: string;
+  };
 }

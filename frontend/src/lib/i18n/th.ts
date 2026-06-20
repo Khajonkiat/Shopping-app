@@ -86,4 +86,18 @@ export const th: Translations = {
     totalSuffix: "รวมทั้งหมด",
     noData: "ยังไม่มีรายการซื้อ — บันทึกด้านบน",
   },
+  auth: {
+    login: "เข้าสู่ระบบ",
+    register: "สมัครสมาชิก",
+    logout: "ออกจากระบบ",
+    email: "อีเมล",
+    username: "ชื่อผู้ใช้",
+    password: "รหัสผ่าน",
+    loginTitle: "เข้าสู่ระบบ",
+    registerTitle: "สร้างบัญชีใหม่",
+    noAccount: "ยังไม่มีบัญชี?",
+    hasAccount: "มีบัญชีอยู่แล้ว?",
+    loginError: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+    registerError: "ไม่สามารถสร้างบัญชีได้",
+  },
 };
