@@ -7,7 +7,6 @@ import { card, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/li
 import type { PriceEntry, Product, ProductImage, Purchase, Store } from "@/lib/types";
 import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
-import { useAuth } from "@/lib/auth";
 
 function toISO(dateStr: string): string | undefined {
   return dateStr ? `${dateStr}T00:00:00Z` : undefined;
@@ -21,7 +20,6 @@ function toDateInput(iso: string | undefined): string {
 export default function ProductDetailPage() {
   const { t } = useLocale();
   const { ready } = useRequireAuth();
-  const { isMaster } = useAuth();
   const { id } = useParams<{ id: string }>();
   const productId = Number(id);
 
@@ -64,12 +62,13 @@ export default function ProductDetailPage() {
   const [editPurchaseError, setEditPurchaseError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.products.get(productId).then(setProduct);
-    api.products.prices(productId).then(setPrices);
-    api.products.purchases(productId).then(setPurchases);
-    api.stores.list().then(setStores);
-    api.images.list(productId).then(setImages);
-  }, [productId]);
+    if (!ready) return;
+    api.products.get(productId).then(setProduct).catch(() => {});
+    api.products.prices(productId).then(setPrices).catch(() => {});
+    api.products.purchases(productId).then(setPurchases).catch(() => {});
+    api.stores.list().then(setStores).catch(() => {});
+    api.images.list(productId).then(setImages).catch(() => {});
+  }, [ready, productId]);
 
   const canSubmitPrice = Number(priceForm.store_id) > 0 && Number(priceForm.price) > 0;
   const canSubmitPurchase = Number(purchaseForm.store_id) > 0 && Number(purchaseForm.price) > 0;
@@ -254,7 +253,7 @@ export default function ProductDetailPage() {
   if (!ready || !product) {
     return (
       <div className="flex items-center justify-center h-48">
-        <p className="text-slate-400 text-sm">{t.common.loading}</p>
+        <p className="text-[#a0907c] text-sm">{t.common.loading}</p>
       </div>
     );
   }
@@ -269,24 +268,24 @@ export default function ProductDetailPage() {
     <div className="space-y-8">
       {/* Breadcrumb + header */}
       <div>
-        <Link href="/products" className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors mb-3">
+        <Link href="/products" className="inline-flex items-center gap-1 text-xs font-medium text-[#a0907c] hover:text-[#4a3728] transition-colors mb-3">
           ← {t.productDetail.back.replace("← ", "")}
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{product.name}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-[#1a1208]">{product.name}</h1>
         {(product.category || product.unit || product.description) && (
           <div className="flex flex-wrap items-center gap-2 mt-2">
             {product.category && (
-              <span className="text-xs font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
+              <span className="text-xs font-medium bg-[#f0e9e0] text-[#4a3728] px-2.5 py-1 rounded-full">
                 {product.category}
               </span>
             )}
             {product.unit && (
-              <span className="text-xs font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
+              <span className="text-xs font-medium bg-[#f0e9e0] text-[#4a3728] px-2.5 py-1 rounded-full">
                 {product.unit}
               </span>
             )}
             {product.description && (
-              <span className="text-xs text-slate-400">{product.description}</span>
+              <span className="text-xs text-[#a0907c]">{product.description}</span>
             )}
           </div>
         )}
@@ -302,8 +301,8 @@ export default function ProductDetailPage() {
                 i === 0 ? "ring-emerald-300/70 shadow-emerald-100" : ""
               }`}
             >
-              <div className="text-xs font-medium text-slate-400 mb-1">{store.name}</div>
-              <div className={`text-xl font-bold tracking-tight ${i === 0 ? "text-emerald-700" : "text-slate-900"}`}>
+              <div className="text-xs font-medium text-[#a0907c] mb-1">{store.name}</div>
+              <div className={`text-xl font-bold tracking-tight ${i === 0 ? "text-emerald-700" : "text-[#1a1208]"}`}>
                 ฿{price.toFixed(2)}
               </div>
               {i === 0 && latestPerStore.length > 1 && (
@@ -317,23 +316,23 @@ export default function ProductDetailPage() {
       )}
 
       {/* Tabs */}
-      <div className="border-b border-slate-200 flex gap-1">
+      <div className="border-b border-[#e8dfd5] flex gap-1">
         {tabs.map(({ key, label, count }) => (
           <button
             key={key}
             onClick={() => setTab(key)}
             className={`relative pb-3 px-1 mr-4 text-sm font-medium transition-colors ${
-              tab === key ? "text-indigo-600" : "text-slate-500 hover:text-slate-700"
+              tab === key ? "text-[#b07040]" : "text-[#7a6858] hover:text-[#4a3728]"
             }`}
           >
             {label}
             <span className={`ml-1.5 text-xs font-semibold px-1.5 py-0.5 rounded-full ${
-              tab === key ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"
+              tab === key ? "bg-[#f0e9e0] text-[#b07040]" : "bg-[#f0e9e0] text-[#a0907c]"
             }`}>
               {count}
             </span>
             {tab === key && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#b07040] rounded-full" />
             )}
           </button>
         ))}
@@ -342,20 +341,18 @@ export default function ProductDetailPage() {
       {/* Prices tab */}
       {tab === "prices" && (
         <div className="space-y-5">
-          {isMaster && (
-            <div className="flex justify-end">
-              <button
-                className={showPriceForm ? btnSecondary : btnPrimary}
-                onClick={() => { setShowPriceForm((v) => !v); setPriceError(null); cancelEditPrice(); }}
-              >
-                {showPriceForm ? t.common.cancel : t.productDetail.recordPrice}
-              </button>
-            </div>
-          )}
+          <div className="flex justify-end">
+            <button
+              className={showPriceForm ? btnSecondary : btnPrimary}
+              onClick={() => { setShowPriceForm((v) => !v); setPriceError(null); cancelEditPrice(); }}
+            >
+              {showPriceForm ? t.common.cancel : t.productDetail.recordPrice}
+            </button>
+          </div>
 
           {showPriceForm && (
             <div className={`${card} p-6`}>
-              <h3 className="text-sm font-semibold text-slate-700 mb-5">Record price</h3>
+              <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Record price</h3>
               <form onSubmit={handleAddPrice} noValidate className="space-y-5">
                 <div className="grid grid-cols-3 gap-5">
                   <div>
@@ -392,12 +389,12 @@ export default function ProductDetailPage() {
                 </div>
 
                 {priceError && (
-                  <p className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+                  <p className="text-sm text-rose-700 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
                     {priceError}
                   </p>
                 )}
 
-                <div className="flex justify-end gap-3 pt-1 border-t border-slate-100">
+                <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
                   <button
                     type="button"
                     className={btnSecondary}
@@ -418,8 +415,8 @@ export default function ProductDetailPage() {
           )}
 
           {editingPriceId !== null && (
-            <div className={`${card} p-6 ring-indigo-300/60`}>
-              <h3 className="text-sm font-semibold text-slate-700 mb-5">Edit price</h3>
+            <div className={`${card} p-6 ring-[#d4b896]/60`}>
+              <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Edit price</h3>
               <form onSubmit={handleUpdatePrice} noValidate className="space-y-5">
                 <div className="grid grid-cols-3 gap-5">
                   <div>
@@ -456,12 +453,12 @@ export default function ProductDetailPage() {
                 </div>
 
                 {editPriceError && (
-                  <p className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+                  <p className="text-sm text-rose-700 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
                     {editPriceError}
                   </p>
                 )}
 
-                <div className="flex justify-end gap-3 pt-1 border-t border-slate-100">
+                <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
                   <button type="button" className={btnSecondary} onClick={cancelEditPrice}>{t.common.cancel}</button>
                   <button
                     type="submit"
@@ -478,7 +475,7 @@ export default function ProductDetailPage() {
           <div className={`${card} overflow-hidden`}>
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/70">
+                <tr className="border-b border-[#f0e9e0] bg-[#faf5ef]">
                   <th className={th}>{t.common.store}</th>
                   <th className={th}>{t.common.price}</th>
                   <th className={th}>{t.common.date}</th>
@@ -489,46 +486,44 @@ export default function ProductDetailPage() {
               <tbody>
                 {prices.length === 0 ? (
                   <tr key="empty">
-                    <td colSpan={5} className="px-4 py-16 text-center text-slate-400 text-sm">
+                    <td colSpan={5} className="px-4 py-16 text-center text-[#a0907c] text-sm">
                       {t.productDetail.noPrices}
                     </td>
                   </tr>
                 ) : prices.map((p) => (
-                  <tr key={String(p.id)} className={`border-b border-slate-100 last:border-0 transition-colors ${editingPriceId === p.id ? "bg-indigo-50/40" : "hover:bg-slate-50/60"}`}>
-                    <td className={`${td} font-medium text-slate-900`}>{p.store?.name ?? `#${p.store_id}`}</td>
-                    <td className={`${td} font-semibold text-slate-900`}>฿{p.price.toFixed(2)}</td>
-                    <td className={`${td} text-slate-400`}>{new Date(p.recorded_at).toLocaleDateString()}</td>
+                  <tr key={String(p.id)} className={`border-b border-[#f0e9e0] last:border-0 transition-colors ${editingPriceId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
+                    <td className={`${td} font-medium text-[#1a1208]`}>{p.store?.name ?? `#${p.store_id}`}</td>
+                    <td className={`${td} font-semibold text-[#1a1208]`}>฿{p.price.toFixed(2)}</td>
+                    <td className={`${td} text-[#a0907c]`}>{new Date(p.recorded_at).toLocaleDateString()}</td>
                     <td className={td}>
                       <span className={`inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full ${
                         p.source_type === "scraped"
-                          ? "bg-indigo-50 text-indigo-700"
-                          : "bg-slate-100 text-slate-600"
+                          ? "bg-[#e8f0e4] text-[#4a6a38]"
+                          : "bg-[#f0e9e0] text-[#4a3728]"
                       }`}>
                         {p.source_type === "scraped" ? t.productDetail.sourceScraped : t.productDetail.sourceManual}
                       </span>
                     </td>
-                    {isMaster && (
-                      <td className={`${td} text-right`}>
-                        <div className="flex items-center justify-end gap-3">
-                          <button
-                            onClick={() => editingPriceId === p.id ? cancelEditPrice() : startEditPrice(p)}
-                            className={`text-xs font-medium transition-colors ${editingPriceId === p.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
-                          >
-                            {editingPriceId === p.id ? t.common.cancel : t.common.edit}
-                          </button>
-                          <button
-                            onClick={async () => {
-                              await api.prices.delete(p.id);
-                              setPrices((prev) => prev.filter((x) => x.id !== p.id));
-                              if (editingPriceId === p.id) cancelEditPrice();
-                            }}
-                            className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors"
-                          >
-                            {t.common.delete}
-                          </button>
-                        </div>
-                      </td>
-                    )}
+                    <td className={`${td} text-right`}>
+                      <div className="flex items-center justify-end gap-3">
+                        <button
+                          onClick={() => editingPriceId === p.id ? cancelEditPrice() : startEditPrice(p)}
+                          className={`text-xs font-medium transition-colors ${editingPriceId === p.id ? "text-[#b07040]" : "text-[#a0907c] hover:text-[#b07040]"}`}
+                        >
+                          {editingPriceId === p.id ? t.common.cancel : t.common.edit}
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await api.prices.delete(p.id);
+                            setPrices((prev) => prev.filter((x) => x.id !== p.id));
+                            if (editingPriceId === p.id) cancelEditPrice();
+                          }}
+                          className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors"
+                        >
+                          {t.common.delete}
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -540,20 +535,18 @@ export default function ProductDetailPage() {
       {/* Purchases tab */}
       {tab === "purchases" && (
         <div className="space-y-5">
-          {isMaster && (
-            <div className="flex justify-end">
-              <button
-                className={showPurchaseForm ? btnSecondary : btnPrimary}
-                onClick={() => { setShowPurchaseForm((v) => !v); setPurchaseError(null); cancelEditPurchase(); }}
-              >
-                {showPurchaseForm ? t.common.cancel : t.productDetail.recordPurchase}
-              </button>
-            </div>
-          )}
+          <div className="flex justify-end">
+            <button
+              className={showPurchaseForm ? btnSecondary : btnPrimary}
+              onClick={() => { setShowPurchaseForm((v) => !v); setPurchaseError(null); cancelEditPurchase(); }}
+            >
+              {showPurchaseForm ? t.common.cancel : t.productDetail.recordPurchase}
+            </button>
+          </div>
 
           {showPurchaseForm && (
             <div className={`${card} p-6`}>
-              <h3 className="text-sm font-semibold text-slate-700 mb-5">Record purchase</h3>
+              <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Record purchase</h3>
               <form onSubmit={handleAddPurchase} noValidate className="space-y-5">
                 <div className="grid grid-cols-3 gap-5">
                   <div>
@@ -609,12 +602,12 @@ export default function ProductDetailPage() {
                 </div>
 
                 {purchaseError && (
-                  <p className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+                  <p className="text-sm text-rose-700 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
                     {purchaseError}
                   </p>
                 )}
 
-                <div className="flex justify-end gap-3 pt-1 border-t border-slate-100">
+                <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
                   <button
                     type="button"
                     className={btnSecondary}
@@ -635,8 +628,8 @@ export default function ProductDetailPage() {
           )}
 
           {editingPurchaseId !== null && (
-            <div className={`${card} p-6 ring-indigo-300/60`}>
-              <h3 className="text-sm font-semibold text-slate-700 mb-5">Edit purchase</h3>
+            <div className={`${card} p-6 ring-[#d4b896]/60`}>
+              <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Edit purchase</h3>
               <form onSubmit={handleUpdatePurchase} noValidate className="space-y-5">
                 <div className="grid grid-cols-3 gap-5">
                   <div>
@@ -692,12 +685,12 @@ export default function ProductDetailPage() {
                 </div>
 
                 {editPurchaseError && (
-                  <p className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+                  <p className="text-sm text-rose-700 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
                     {editPurchaseError}
                   </p>
                 )}
 
-                <div className="flex justify-end gap-3 pt-1 border-t border-slate-100">
+                <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
                   <button type="button" className={btnSecondary} onClick={cancelEditPurchase}>{t.common.cancel}</button>
                   <button
                     type="submit"
@@ -714,7 +707,7 @@ export default function ProductDetailPage() {
           <div className={`${card} overflow-hidden`}>
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/70">
+                <tr className="border-b border-[#f0e9e0] bg-[#faf5ef]">
                   <th className={th}>{t.common.store}</th>
                   <th className={th}>{t.common.price}</th>
                   <th className={th}>{t.common.qty}</th>
@@ -727,40 +720,38 @@ export default function ProductDetailPage() {
               <tbody>
                 {purchases.length === 0 ? (
                   <tr key="empty">
-                    <td colSpan={7} className="px-4 py-16 text-center text-slate-400 text-sm">
+                    <td colSpan={7} className="px-4 py-16 text-center text-[#a0907c] text-sm">
                       {t.productDetail.noPurchases}
                     </td>
                   </tr>
                 ) : purchases.map((p) => (
-                  <tr key={String(p.id)} className={`border-b border-slate-100 last:border-0 transition-colors ${editingPurchaseId === p.id ? "bg-indigo-50/40" : "hover:bg-slate-50/60"}`}>
-                    <td className={`${td} font-medium text-slate-900`}>{p.store?.name ?? `#${p.store_id}`}</td>
-                    <td className={`${td} text-slate-700`}>฿{p.price.toFixed(2)}</td>
-                    <td className={`${td} text-slate-600`}>{p.quantity}</td>
-                    <td className={`${td} font-semibold text-slate-900`}>฿{(p.price * p.quantity).toFixed(2)}</td>
-                    <td className={`${td} text-slate-400`}>{new Date(p.purchased_at).toLocaleDateString()}</td>
-                    <td className={`${td} text-slate-400`}>{p.notes || <span className="text-slate-300">—</span>}</td>
-                    {isMaster && (
-                      <td className={`${td} text-right`}>
-                        <div className="flex items-center justify-end gap-3">
-                          <button
-                            onClick={() => editingPurchaseId === p.id ? cancelEditPurchase() : startEditPurchase(p)}
-                            className={`text-xs font-medium transition-colors ${editingPurchaseId === p.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
-                          >
-                            {editingPurchaseId === p.id ? t.common.cancel : t.common.edit}
-                          </button>
-                          <button
-                            onClick={async () => {
-                              await api.purchases.delete(p.id);
-                              setPurchases((prev) => prev.filter((x) => x.id !== p.id));
-                              if (editingPurchaseId === p.id) cancelEditPurchase();
-                            }}
-                            className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors"
-                          >
-                            {t.common.delete}
-                          </button>
-                        </div>
-                      </td>
-                    )}
+                  <tr key={String(p.id)} className={`border-b border-[#f0e9e0] last:border-0 transition-colors ${editingPurchaseId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
+                    <td className={`${td} font-medium text-[#1a1208]`}>{p.store?.name ?? `#${p.store_id}`}</td>
+                    <td className={`${td} text-[#4a3728]`}>฿{p.price.toFixed(2)}</td>
+                    <td className={`${td} text-[#4a3728]`}>{p.quantity}</td>
+                    <td className={`${td} font-semibold text-[#1a1208]`}>฿{(p.price * p.quantity).toFixed(2)}</td>
+                    <td className={`${td} text-[#a0907c]`}>{new Date(p.purchased_at).toLocaleDateString()}</td>
+                    <td className={`${td} text-[#a0907c]`}>{p.notes || <span className="text-[#c4b5a5]">—</span>}</td>
+                    <td className={`${td} text-right`}>
+                      <div className="flex items-center justify-end gap-3">
+                        <button
+                          onClick={() => editingPurchaseId === p.id ? cancelEditPurchase() : startEditPurchase(p)}
+                          className={`text-xs font-medium transition-colors ${editingPurchaseId === p.id ? "text-[#b07040]" : "text-[#a0907c] hover:text-[#b07040]"}`}
+                        >
+                          {editingPurchaseId === p.id ? t.common.cancel : t.common.edit}
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await api.purchases.delete(p.id);
+                            setPurchases((prev) => prev.filter((x) => x.id !== p.id));
+                            if (editingPurchaseId === p.id) cancelEditPurchase();
+                          }}
+                          className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors"
+                        >
+                          {t.common.delete}
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -773,50 +764,46 @@ export default function ProductDetailPage() {
       {tab === "images" && (
         <div className="space-y-5">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-slate-500">{images.length} {t.productDetail.imagesTab}</p>
-            {isMaster && (
-              <label className={`${btnPrimary} cursor-pointer`}>
-                {imageUploading ? "Uploading…" : t.productDetail.uploadImage}
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif,image/webp"
-                  className="hidden"
-                  disabled={imageUploading}
-                  onChange={handleImageUpload}
-                />
-              </label>
-            )}
+            <p className="text-sm text-[#7a6858]">{images.length} {t.productDetail.imagesTab}</p>
+            <label className={`${btnPrimary} cursor-pointer`}>
+              {imageUploading ? "Uploading…" : t.productDetail.uploadImage}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                className="hidden"
+                disabled={imageUploading}
+                onChange={handleImageUpload}
+              />
+            </label>
           </div>
 
           {imageError && (
-            <p className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+            <p className="text-sm text-rose-700 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
               {imageError}
             </p>
           )}
 
           {images.length === 0 ? (
-            <div className={`${card} px-4 py-16 text-center text-slate-400 text-sm`}>
+            <div className={`${card} px-4 py-16 text-center text-[#a0907c] text-sm`}>
               {t.productDetail.noImages}
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {images.map((img) => (
                 <div key={img.id} className="group relative">
-                  <div className="aspect-square overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                  <div className="aspect-square overflow-hidden rounded-xl border border-[#e8dfd5] bg-[#fdf9f5]">
                     <img
                       src={imageUrl(img.filename)}
                       alt=""
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  {isMaster && (
-                    <button
-                      onClick={() => handleImageDelete(img)}
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-rose-50 text-rose-500 rounded-lg px-2 py-1 text-xs font-medium shadow-sm border border-rose-100"
-                    >
-                      {t.common.delete}
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleImageDelete(img)}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-rose-50 text-rose-500 rounded-lg px-2 py-1 text-xs font-medium shadow-sm border border-rose-100"
+                  >
+                    {t.common.delete}
+                  </button>
                 </div>
               ))}
             </div>

@@ -6,6 +6,7 @@ export const th: Translations = {
     products: "สินค้า",
     stores: "ร้านค้า",
     purchases: "การซื้อ",
+    household: "ครัวเรือน",
   },
   common: {
     loading: "กำลังโหลด…",
@@ -85,6 +86,18 @@ export const th: Translations = {
     recordsSuffix: "รายการ",
     totalSuffix: "รวมทั้งหมด",
     noData: "ยังไม่มีรายการซื้อ — บันทึกด้านบน",
+  },
+  household: {
+    title: "ครัวเรือน",
+    members: "สมาชิก",
+    inviteButton: "สร้างลิงก์เชิญ",
+    inviteCode: "รหัสเชิญ (ใช้ได้ 7 วัน)",
+    inviteCopied: "คัดลอกแล้ว!",
+    joinTitle: "เข้าร่วมครัวเรือน",
+    joinPlaceholder: "วางรหัสเชิญ…",
+    joinButton: "เข้าร่วม",
+    joinSuccess: "เข้าร่วมครัวเรือนสำเร็จ กรุณาล็อกอินใหม่เพื่ออัปเดตเซสชัน",
+    joinError: "รหัสเชิญไม่ถูกต้องหรือหมดอายุแล้ว",
   },
   auth: {
     login: "เข้าสู่ระบบ",

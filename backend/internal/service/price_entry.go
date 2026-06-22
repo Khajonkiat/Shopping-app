@@ -14,10 +14,10 @@ func NewPriceEntryService(db *gorm.DB) *PriceEntryService {
 	return &PriceEntryService{db: db}
 }
 
-func (s *PriceEntryService) ListByProduct(productID uint) ([]model.PriceEntry, error) {
+func (s *PriceEntryService) ListByProduct(productID, householdID uint) ([]model.PriceEntry, error) {
 	var entries []model.PriceEntry
 	err := s.db.Preload("Store").
-		Where("product_id = ?", productID).
+		Where("product_id = ? AND household_id = ?", productID, householdID).
 		Order("recorded_at DESC").
 		Find(&entries).Error
 	if err != nil {
@@ -30,8 +30,10 @@ func (s *PriceEntryService) Create(entry *model.PriceEntry) error {
 	return s.db.Create(entry).Error
 }
 
-func (s *PriceEntryService) Update(id uint, updates map[string]any) (*model.PriceEntry, error) {
-	if err := s.db.Model(&model.PriceEntry{}).Where("id = ?", id).Updates(updates).Error; err != nil {
+func (s *PriceEntryService) Update(id, householdID uint, updates map[string]any) (*model.PriceEntry, error) {
+	if err := s.db.Model(&model.PriceEntry{}).
+		Where("id = ? AND household_id = ?", id, householdID).
+		Updates(updates).Error; err != nil {
 		return nil, err
 	}
 	var entry model.PriceEntry
@@ -41,6 +43,6 @@ func (s *PriceEntryService) Update(id uint, updates map[string]any) (*model.Pric
 	return &entry, nil
 }
 
-func (s *PriceEntryService) Delete(id uint) error {
-	return s.db.Delete(&model.PriceEntry{}, id).Error
+func (s *PriceEntryService) Delete(id, householdID uint) error {
+	return s.db.Where("household_id = ?", householdID).Delete(&model.PriceEntry{}, id).Error
 }

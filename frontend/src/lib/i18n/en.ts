@@ -6,6 +6,7 @@ export const en: Translations = {
     products: "Products",
     stores: "Stores",
     purchases: "Purchases",
+    household: "Household",
   },
   common: {
     loading: "Loading…",
@@ -85,6 +86,18 @@ export const en: Translations = {
     recordsSuffix: "records",
     totalSuffix: "total",
     noData: "No purchases yet — record one above.",
+  },
+  household: {
+    title: "Household",
+    members: "Members",
+    inviteButton: "Generate Invite Link",
+    inviteCode: "Invite code (valid 7 days)",
+    inviteCopied: "Copied!",
+    joinTitle: "Join a Household",
+    joinPlaceholder: "Paste invite code…",
+    joinButton: "Join",
+    joinSuccess: "Joined household successfully. Please log in again to refresh your session.",
+    joinError: "Invalid or expired invite code.",
   },
   auth: {
     login: "Log in",

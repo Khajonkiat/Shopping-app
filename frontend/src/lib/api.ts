@@ -1,4 +1,4 @@
-import type { PriceEntry, Product, ProductImage, Purchase, Store } from "./types";
+import type { Household, HouseholdInvite, PriceEntry, Product, ProductImage, Purchase, Store } from "./types";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
@@ -33,7 +33,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export interface AuthResponse {
   token: string;
-  user: { id: number; email: string; username: string; role: "master" | "user" };
+  user: { id: number; email: string; username: string; role: "master" | "user"; household_id: number };
 }
 
 export const api = {
@@ -113,6 +113,16 @@ export const api = {
       }),
     delete: (id: number) =>
       request<void>(`/purchases/${id}`, { method: "DELETE" }),
+  },
+
+  household: {
+    get: () => request<Household>("/household"),
+    generateInvite: () => request<HouseholdInvite>("/household/invite", { method: "POST" }),
+    join: (code: string) =>
+      request<Household>("/household/join", {
+        method: "POST",
+        body: JSON.stringify({ code }),
+      }),
   },
 
   images: {

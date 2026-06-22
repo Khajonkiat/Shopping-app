@@ -22,7 +22,7 @@ func (h *PriceEntryHandler) ListByProduct(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	entries, err := h.svc.ListByProduct(productID)
+	entries, err := h.svc.ListByProduct(productID, getHouseholdID(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -42,6 +42,7 @@ func (h *PriceEntryHandler) Create(c *gin.Context) {
 	if entry.SourceType == "" {
 		entry.SourceType = model.SourceTypeManual
 	}
+	entry.HouseholdID = getHouseholdID(c)
 	if err := h.svc.Create(&entry); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -59,7 +60,7 @@ func (h *PriceEntryHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	entry, err := h.svc.Update(id, updates)
+	entry, err := h.svc.Update(id, getHouseholdID(c), updates)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -72,7 +73,7 @@ func (h *PriceEntryHandler) Delete(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	if err := h.svc.Delete(id); err != nil {
+	if err := h.svc.Delete(id, getHouseholdID(c)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

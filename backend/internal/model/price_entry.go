@@ -11,7 +11,8 @@ const (
 
 type PriceEntry struct {
 	Base
-	ProductID  uint       `gorm:"not null;index" json:"product_id"`
+	HouseholdID uint       `gorm:"not null;index" json:"household_id"`
+	ProductID   uint       `gorm:"not null;index" json:"product_id"`
 	StoreID    uint       `gorm:"not null;index" json:"store_id"`
 	Price      float64    `gorm:"not null" json:"price"`
 	Currency   string     `gorm:"default:'THB'" json:"currency"`

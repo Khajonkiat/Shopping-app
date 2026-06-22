@@ -1,3 +1,28 @@
+export interface Household {
+  id: number;
+  name: string;
+  admin_id: number;
+  members?: HouseholdMember[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HouseholdMember {
+  id: number;
+  email: string;
+  username: string;
+  role: string;
+  household_id: number;
+}
+
+export interface HouseholdInvite {
+  id: number;
+  household_id: number;
+  code: string;
+  expires_at: string;
+  used_at: string | null;
+}
+
 export interface ProductImage {
   id: number;
   product_id: number;

@@ -10,6 +10,7 @@ interface AuthUser {
   email: string;
   username: string;
   role: UserRole;
+  household_id: number;
 }
 
 interface AuthContextValue {
@@ -41,6 +42,7 @@ function parseToken(stored: string): AuthUser | null {
       email: payload.email,
       username: payload.username ?? payload.email,
       role: (payload.role as UserRole) ?? "user",
+      household_id: payload.household_id ?? 0,
     };
   } catch {
     return null;

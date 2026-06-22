@@ -20,7 +20,7 @@ func NewProductHandler(svc *service.ProductService) *ProductHandler {
 }
 
 func (h *ProductHandler) List(c *gin.Context) {
-	products, err := h.svc.List()
+	products, err := h.svc.List(getHouseholdID(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -33,7 +33,7 @@ func (h *ProductHandler) Get(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	product, err := h.svc.GetByID(id)
+	product, err := h.svc.GetByID(id, getHouseholdID(c))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "product not found"})
@@ -51,6 +51,7 @@ func (h *ProductHandler) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	product.HouseholdID = getHouseholdID(c)
 	if err := h.svc.Create(&product); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -68,7 +69,7 @@ func (h *ProductHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	product, err := h.svc.Update(id, updates)
+	product, err := h.svc.Update(id, getHouseholdID(c), updates)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "product not found"})
@@ -85,7 +86,7 @@ func (h *ProductHandler) Delete(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	if err := h.svc.Delete(id); err != nil {
+	if err := h.svc.Delete(id, getHouseholdID(c)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

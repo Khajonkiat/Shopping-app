@@ -5,7 +5,6 @@ import { card, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/li
 import type { Product, Purchase, Store } from "@/lib/types";
 import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
-import { useAuth } from "@/lib/auth";
 
 function toISO(dateStr: string): string | undefined {
   return dateStr ? `${dateStr}T00:00:00Z` : undefined;
@@ -21,7 +20,6 @@ const emptyForm = { product_id: "", store_id: "", price: "", quantity: "1", purc
 export default function PurchasesPage() {
   const { t } = useLocale();
   const { ready } = useRequireAuth();
-  const { isMaster } = useAuth();
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Store[]>([]);
@@ -36,10 +34,11 @@ export default function PurchasesPage() {
   const [editError, setEditError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.purchases.list().then(setPurchases);
-    api.products.list().then(setProducts);
-    api.stores.list().then(setStores);
-  }, []);
+    if (!ready) return;
+    api.purchases.list().then(setPurchases).catch(() => {});
+    api.products.list().then(setProducts).catch(() => {});
+    api.stores.list().then(setStores).catch(() => {});
+  }, [ready]);
 
   const canSubmit = Number(form.product_id) > 0 && Number(form.store_id) > 0 && Number(form.price) > 0;
   const canEditSubmit = Number(editForm.product_id) > 0 && Number(editForm.store_id) > 0 && Number(editForm.price) > 0;
@@ -129,32 +128,30 @@ export default function PurchasesPage() {
     <div className="space-y-8">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{t.purchases.title}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-[#1a1208]">{t.purchases.title}</h1>
           {purchases.length > 0 ? (
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-[#7a6858] mt-1">
               {purchases.length} {t.purchases.recordsSuffix}
-              <span className="mx-1.5 text-slate-300">·</span>
-              <span className="font-medium text-slate-700">
+              <span className="mx-1.5 text-[#c4b5a5]">·</span>
+              <span className="font-medium text-[#4a3728]">
                 ฿{totalSpend.toLocaleString("th-TH", { minimumFractionDigits: 2 })} {t.purchases.totalSuffix}
               </span>
             </p>
           ) : (
-            <p className="text-sm text-slate-400 mt-1">0 {t.purchases.recordsSuffix}</p>
+            <p className="text-sm text-[#a0907c] mt-1">0 {t.purchases.recordsSuffix}</p>
           )}
         </div>
-        {isMaster && (
-          <button
-            className={showForm ? btnSecondary : btnPrimary}
-            onClick={() => { setShowForm((v) => !v); setError(null); cancelEdit(); }}
-          >
-            {showForm ? t.common.cancel : t.purchases.recordButton}
-          </button>
-        )}
+        <button
+          className={showForm ? btnSecondary : btnPrimary}
+          onClick={() => { setShowForm((v) => !v); setError(null); cancelEdit(); }}
+        >
+          {showForm ? t.common.cancel : t.purchases.recordButton}
+        </button>
       </div>
 
       {showForm && (
         <div className={`${card} p-6`}>
-          <h3 className="text-sm font-semibold text-slate-700 mb-5">Record purchase</h3>
+          <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Record purchase</h3>
           <form onSubmit={handleCreate} noValidate className="space-y-5">
             <div className="grid grid-cols-3 gap-5">
               <div>
@@ -223,12 +220,12 @@ export default function PurchasesPage() {
             </div>
 
             {error && (
-              <p className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+              <p className="text-sm text-rose-700 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
                 {error}
               </p>
             )}
 
-            <div className="flex justify-end gap-3 pt-1 border-t border-slate-100">
+            <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
               <button
                 type="button"
                 className={btnSecondary}
@@ -249,8 +246,8 @@ export default function PurchasesPage() {
       )}
 
       {editingId !== null && (
-        <div className={`${card} p-6 ring-indigo-300/60`}>
-          <h3 className="text-sm font-semibold text-slate-700 mb-5">Edit purchase</h3>
+        <div className={`${card} p-6 ring-[#d4b896]/60`}>
+          <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Edit purchase</h3>
           <form onSubmit={handleUpdate} noValidate className="space-y-5">
             <div className="grid grid-cols-3 gap-5">
               <div>
@@ -319,12 +316,12 @@ export default function PurchasesPage() {
             </div>
 
             {editError && (
-              <p className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+              <p className="text-sm text-rose-700 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
                 {editError}
               </p>
             )}
 
-            <div className="flex justify-end gap-3 pt-1 border-t border-slate-100">
+            <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
               <button type="button" className={btnSecondary} onClick={cancelEdit}>{t.common.cancel}</button>
               <button
                 type="submit"
@@ -341,7 +338,7 @@ export default function PurchasesPage() {
       <div className={`${card} overflow-hidden`}>
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-100 bg-slate-50/70">
+            <tr className="border-b border-[#f0e9e0] bg-[#faf5ef]">
               <th className={th}>{t.common.product}</th>
               <th className={th}>{t.common.store}</th>
               <th className={th}>{t.common.price}</th>
@@ -355,41 +352,39 @@ export default function PurchasesPage() {
           <tbody>
             {purchases.length === 0 ? (
               <tr key="empty">
-                <td colSpan={8} className="px-4 py-16 text-center text-slate-400 text-sm">
+                <td colSpan={8} className="px-4 py-16 text-center text-[#a0907c] text-sm">
                   {t.purchases.noData}
                 </td>
               </tr>
             ) : purchases.map((p) => (
-              <tr key={String(p.id)} className={`border-b border-slate-100 last:border-0 transition-colors ${editingId === p.id ? "bg-indigo-50/40" : "hover:bg-slate-50/60"}`}>
-                <td className={`${td} font-medium text-slate-900`}>{p.product?.name ?? `#${p.product_id}`}</td>
-                <td className={`${td} text-slate-500`}>{p.store?.name ?? `#${p.store_id}`}</td>
-                <td className={`${td} text-slate-700`}>฿{p.price.toFixed(2)}</td>
-                <td className={`${td} text-slate-600`}>{p.quantity}</td>
-                <td className={`${td} font-semibold text-slate-900`}>฿{(p.price * p.quantity).toFixed(2)}</td>
-                <td className={`${td} text-slate-400`}>{new Date(p.purchased_at).toLocaleDateString()}</td>
-                <td className={`${td} text-slate-400`}>{p.notes || <span className="text-slate-300">—</span>}</td>
-                {isMaster && (
-                  <td className={`${td} text-right`}>
-                    <div className="flex items-center justify-end gap-3">
-                      <button
-                        onClick={() => editingId === p.id ? cancelEdit() : startEdit(p)}
-                        className={`text-xs font-medium transition-colors ${editingId === p.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
-                      >
-                        {editingId === p.id ? t.common.cancel : t.common.edit}
-                      </button>
-                      <button
-                        onClick={async () => {
-                          await api.purchases.delete(p.id);
-                          setPurchases((prev) => prev.filter((x) => x.id !== p.id));
-                          if (editingId === p.id) cancelEdit();
-                        }}
-                        className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors"
-                      >
-                        {t.common.delete}
-                      </button>
-                    </div>
-                  </td>
-                )}
+              <tr key={String(p.id)} className={`border-b border-[#f0e9e0] last:border-0 transition-colors ${editingId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
+                <td className={`${td} font-medium text-[#1a1208]`}>{p.product?.name ?? `#${p.product_id}`}</td>
+                <td className={`${td} text-[#7a6858]`}>{p.store?.name ?? `#${p.store_id}`}</td>
+                <td className={`${td} text-[#4a3728]`}>฿{p.price.toFixed(2)}</td>
+                <td className={`${td} text-[#4a3728]`}>{p.quantity}</td>
+                <td className={`${td} font-semibold text-[#1a1208]`}>฿{(p.price * p.quantity).toFixed(2)}</td>
+                <td className={`${td} text-[#a0907c]`}>{new Date(p.purchased_at).toLocaleDateString()}</td>
+                <td className={`${td} text-[#a0907c]`}>{p.notes || <span className="text-[#c4b5a5]">—</span>}</td>
+                <td className={`${td} text-right`}>
+                  <div className="flex items-center justify-end gap-3">
+                    <button
+                      onClick={() => editingId === p.id ? cancelEdit() : startEdit(p)}
+                      className={`text-xs font-medium transition-colors ${editingId === p.id ? "text-[#b07040]" : "text-[#a0907c] hover:text-[#b07040]"}`}
+                    >
+                      {editingId === p.id ? t.common.cancel : t.common.edit}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await api.purchases.delete(p.id);
+                        setPurchases((prev) => prev.filter((x) => x.id !== p.id));
+                        if (editingId === p.id) cancelEdit();
+                      }}
+                      className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors"
+                    >
+                      {t.common.delete}
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

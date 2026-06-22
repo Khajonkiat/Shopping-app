@@ -6,6 +6,7 @@ export interface Translations {
     products: string;
     stores: string;
     purchases: string;
+    household: string;
   };
   common: {
     loading: string;
@@ -87,6 +88,18 @@ export interface Translations {
     recordsSuffix: string;
     totalSuffix: string;
     noData: string;
+  };
+  household: {
+    title: string;
+    members: string;
+    inviteButton: string;
+    inviteCode: string;
+    inviteCopied: string;
+    joinTitle: string;
+    joinPlaceholder: string;
+    joinButton: string;
+    joinSuccess: string;
+    joinError: string;
   };
   auth: {
     login: string;

@@ -18,7 +18,7 @@ func NewPurchaseHandler(svc *service.PurchaseService) *PurchaseHandler {
 }
 
 func (h *PurchaseHandler) List(c *gin.Context) {
-	purchases, err := h.svc.List()
+	purchases, err := h.svc.List(getHouseholdID(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -31,7 +31,7 @@ func (h *PurchaseHandler) ListByProduct(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	purchases, err := h.svc.ListByProduct(productID)
+	purchases, err := h.svc.ListByProduct(productID, getHouseholdID(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -48,6 +48,7 @@ func (h *PurchaseHandler) Create(c *gin.Context) {
 	if purchase.PurchasedAt.IsZero() {
 		purchase.PurchasedAt = time.Now()
 	}
+	purchase.HouseholdID = getHouseholdID(c)
 	if err := h.svc.Create(&purchase); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -65,7 +66,7 @@ func (h *PurchaseHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	purchase, err := h.svc.Update(id, updates)
+	purchase, err := h.svc.Update(id, getHouseholdID(c), updates)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -78,7 +79,7 @@ func (h *PurchaseHandler) Delete(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	if err := h.svc.Delete(id); err != nil {
+	if err := h.svc.Delete(id, getHouseholdID(c)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

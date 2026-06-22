@@ -28,6 +28,12 @@ func main() {
 		if err := userSvc.EnsureMaster(cfg.MasterEmail, cfg.MasterUsername, cfg.MasterPassword); err != nil {
 			log.Fatalf("failed to ensure master account: %v", err)
 		}
+
+		householdSvc := service.NewHouseholdService(database)
+		if err := householdSvc.EnsureMasterHousehold(cfg.MasterEmail); err != nil {
+			log.Fatalf("failed to ensure master household: %v", err)
+		}
+
 		log.Printf("master account ready: %s", cfg.MasterEmail)
 	} else {
 		log.Println("warning: MASTER_EMAIL / MASTER_PASSWORD not set — no master account provisioned")

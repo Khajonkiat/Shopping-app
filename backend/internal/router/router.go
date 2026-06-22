@@ -17,20 +17,20 @@ func Setup(db *gorm.DB, uploadDir string, jwtSecret string) *gin.Engine {
 	r.Static("/uploads", uploadDir)
 
 	userSvc := service.NewUserService(db)
+	householdSvc := service.NewHouseholdService(db)
 	productSvc := service.NewProductService(db)
 	storeSvc := service.NewStoreService(db)
 	priceEntrySvc := service.NewPriceEntryService(db)
 	purchaseSvc := service.NewPurchaseService(db)
 	imageSvc := service.NewProductImageService(db)
 
-	authH := handler.NewAuthHandler(userSvc, jwtSecret)
+	authH := handler.NewAuthHandler(userSvc, householdSvc, jwtSecret)
+	householdH := handler.NewHouseholdHandler(householdSvc)
 	productH := handler.NewProductHandler(productSvc)
 	storeH := handler.NewStoreHandler(storeSvc)
 	priceEntryH := handler.NewPriceEntryHandler(priceEntrySvc)
 	purchaseH := handler.NewPurchaseHandler(purchaseSvc)
 	imageH := handler.NewProductImageHandler(imageSvc, uploadDir)
-
-	masterOnly := middleware.RequireRole("master")
 
 	api := r.Group("/api/v1")
 
@@ -45,38 +45,46 @@ func Setup(db *gorm.DB, uploadDir string, jwtSecret string) *gin.Engine {
 	protected := api.Group("")
 	protected.Use(middleware.Auth(jwtSecret))
 	{
+		// Household
+		household := protected.Group("/household")
+		{
+			household.GET("", householdH.Get)
+			household.POST("/invite", householdH.GenerateInvite)
+			household.POST("/join", householdH.AcceptInvite)
+		}
+
 		products := protected.Group("/products")
 		{
 			products.GET("", productH.List)
-			products.POST("", masterOnly, productH.Create)
+			products.POST("", productH.Create)
 			products.GET("/:id", productH.Get)
-			products.PATCH("/:id", masterOnly, productH.Update)
-			products.DELETE("/:id", masterOnly, productH.Delete)
+			products.PATCH("/:id", productH.Update)
+			products.DELETE("/:id", productH.Delete)
 			products.GET("/:id/prices", priceEntryH.ListByProduct)
 			products.GET("/:id/purchases", purchaseH.ListByProduct)
 			products.GET("/:id/images", imageH.List)
-			products.POST("/:id/images", masterOnly, imageH.Upload)
+			products.POST("/:id/images", imageH.Upload)
 		}
 
 		stores := protected.Group("/stores")
 		{
 			stores.GET("", storeH.List)
-			stores.POST("", masterOnly, storeH.Create)
+			stores.POST("", storeH.Create)
 			stores.GET("/:id", storeH.Get)
-			stores.PATCH("/:id", masterOnly, storeH.Update)
-			stores.DELETE("/:id", masterOnly, storeH.Delete)
+			stores.PATCH("/:id", storeH.Update)
+			stores.DELETE("/:id", storeH.Delete)
 		}
 
-		protected.POST("/prices", masterOnly, priceEntryH.Create)
-		protected.PATCH("/prices/:id", masterOnly, priceEntryH.Update)
-		protected.DELETE("/prices/:id", masterOnly, priceEntryH.Delete)
+		protected.POST("/prices", priceEntryH.Create)
+		protected.PATCH("/prices/:id", priceEntryH.Update)
+		protected.DELETE("/prices/:id", priceEntryH.Delete)
 
 		protected.GET("/purchases", purchaseH.List)
-		protected.POST("/purchases", masterOnly, purchaseH.Create)
-		protected.PATCH("/purchases/:id", masterOnly, purchaseH.Update)
-		protected.DELETE("/purchases/:id", masterOnly, purchaseH.Delete)
+		protected.POST("/purchases", purchaseH.Create)
+		protected.PATCH("/purchases/:id", purchaseH.Update)
+		protected.DELETE("/purchases/:id", purchaseH.Delete)
 
-		protected.DELETE("/images/:id", masterOnly, imageH.Delete)
+		protected.DELETE("/images/:id", imageH.Delete)
 	}
 
 	return r

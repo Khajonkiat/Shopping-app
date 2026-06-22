@@ -5,14 +5,12 @@ import { card, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/li
 import type { Store } from "@/lib/types";
 import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
-import { useAuth } from "@/lib/auth";
 
 const emptyForm = { name: "", base_url: "" };
 
 export default function StoresPage() {
   const { t } = useLocale();
   const { ready } = useRequireAuth();
-  const { isMaster } = useAuth();
   const [stores, setStores] = useState<Store[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -20,7 +18,7 @@ export default function StoresPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState(emptyForm);
 
-  useEffect(() => { api.stores.list().then(setStores); }, []);
+  useEffect(() => { if (ready) api.stores.list().then(setStores).catch(() => {}); }, [ready]);
 
   function startEdit(s: Store) {
     setShowForm(false);
@@ -62,22 +60,20 @@ export default function StoresPage() {
     <div className="space-y-8">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{t.stores.title}</h1>
-          <p className="text-sm text-slate-500 mt-1">{stores.length} {stores.length === 1 ? "store" : "stores"}</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-[#1a1208]">{t.stores.title}</h1>
+          <p className="text-sm text-[#7a6858] mt-1">{stores.length} {stores.length === 1 ? "store" : "stores"}</p>
         </div>
-        {isMaster && (
-          <button
-            className={showForm ? btnSecondary : btnPrimary}
-            onClick={() => { setShowForm((v) => !v); cancelEdit(); }}
-          >
-            {showForm ? t.common.cancel : t.stores.addButton}
-          </button>
-        )}
+        <button
+          className={showForm ? btnSecondary : btnPrimary}
+          onClick={() => { setShowForm((v) => !v); cancelEdit(); }}
+        >
+          {showForm ? t.common.cancel : t.stores.addButton}
+        </button>
       </div>
 
       {showForm && (
         <div className={`${card} p-6`}>
-          <h3 className="text-sm font-semibold text-slate-700 mb-5">New store</h3>
+          <h3 className="text-sm font-semibold text-[#4a3728] mb-5">New store</h3>
           <form onSubmit={handleCreate} className="space-y-5">
             <div className="grid grid-cols-2 gap-5">
               <div>
@@ -93,7 +89,7 @@ export default function StoresPage() {
                   placeholder="https://…" />
               </div>
             </div>
-            <div className="flex justify-end gap-3 pt-1 border-t border-slate-100">
+            <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
               <button type="button" className={btnSecondary} onClick={() => setShowForm(false)}>{t.common.cancel}</button>
               <button type="submit" className={btnPrimary}>{t.common.create}</button>
             </div>
@@ -102,8 +98,8 @@ export default function StoresPage() {
       )}
 
       {editingId !== null && (
-        <div className={`${card} p-6 ring-indigo-300/60`}>
-          <h3 className="text-sm font-semibold text-slate-700 mb-5">Edit store</h3>
+        <div className={`${card} p-6 ring-[#d4b896]/60`}>
+          <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Edit store</h3>
           <form onSubmit={handleUpdate} className="space-y-5">
             <div className="grid grid-cols-2 gap-5">
               <div>
@@ -119,7 +115,7 @@ export default function StoresPage() {
                   placeholder="https://…" />
               </div>
             </div>
-            <div className="flex justify-end gap-3 pt-1 border-t border-slate-100">
+            <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
               <button type="button" className={btnSecondary} onClick={cancelEdit}>{t.common.cancel}</button>
               <button type="submit" className={btnPrimary}>{t.common.save}</button>
             </div>
@@ -130,7 +126,7 @@ export default function StoresPage() {
       <div className={`${card} overflow-hidden`}>
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-100 bg-slate-50/70">
+            <tr className="border-b border-[#f0e9e0] bg-[#faf5ef]">
               <th className={th}>{t.common.name}</th>
               <th className={th}>{t.common.baseUrl}</th>
               <th className={th} />
@@ -139,34 +135,32 @@ export default function StoresPage() {
           <tbody>
             {stores.length === 0 ? (
               <tr key="empty">
-                <td colSpan={3} className="px-4 py-16 text-center text-slate-400 text-sm">{t.stores.noData}</td>
+                <td colSpan={3} className="px-4 py-16 text-center text-[#a0907c] text-sm">{t.stores.noData}</td>
               </tr>
             ) : stores.map((s) => (
-              <tr key={String(s.id)} className={`border-b border-slate-100 last:border-0 transition-colors ${editingId === s.id ? "bg-indigo-50/40" : "hover:bg-slate-50/60"}`}>
-                <td className={`${td} font-medium text-slate-900`}>{s.name}</td>
+              <tr key={String(s.id)} className={`border-b border-[#f0e9e0] last:border-0 transition-colors ${editingId === s.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
+                <td className={`${td} font-medium text-[#1a1208]`}>{s.name}</td>
                 <td className={td}>
                   {s.base_url ? (
                     <a href={s.base_url} target="_blank" rel="noreferrer"
-                      className="text-xs text-indigo-600 hover:text-indigo-700 hover:underline transition-colors">
+                      className="text-xs text-[#b07040] hover:text-[#8f5a32] hover:underline transition-colors">
                       {s.base_url}
                     </a>
-                  ) : <span className="text-slate-300 text-sm">—</span>}
+                  ) : <span className="text-[#c4b5a5] text-sm">—</span>}
                 </td>
-                {isMaster && (
-                  <td className={`${td} text-right`}>
-                    <div className="flex items-center justify-end gap-3">
-                      <button
-                        onClick={() => editingId === s.id ? cancelEdit() : startEdit(s)}
-                        className={`text-xs font-medium transition-colors ${editingId === s.id ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}
-                      >
-                        {editingId === s.id ? t.common.cancel : t.common.edit}
-                      </button>
-                      <button onClick={() => handleDelete(s.id)} className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors">
-                        {t.common.delete}
-                      </button>
-                    </div>
-                  </td>
-                )}
+                <td className={`${td} text-right`}>
+                  <div className="flex items-center justify-end gap-3">
+                    <button
+                      onClick={() => editingId === s.id ? cancelEdit() : startEdit(s)}
+                      className={`text-xs font-medium transition-colors ${editingId === s.id ? "text-[#b07040]" : "text-[#a0907c] hover:text-[#b07040]"}`}
+                    >
+                      {editingId === s.id ? t.common.cancel : t.common.edit}
+                    </button>
+                    <button onClick={() => handleDelete(s.id)} className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors">
+                      {t.common.delete}
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

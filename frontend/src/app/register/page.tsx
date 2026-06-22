@@ -44,46 +44,46 @@ export default function RegisterPage() {
   return (
     <div className="min-h-[70vh] flex items-center justify-center">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-center mb-8">{t.auth.registerTitle}</h1>
+        <h1 className="text-xl font-semibold text-center text-[#1a1208] mb-7">{t.auth.registerTitle}</h1>
 
-        <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="bg-white border border-[#e8dfd5] rounded-2xl p-7 flex flex-col gap-4">
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
+            <p className="text-sm text-rose-700 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">{error}</p>
           )}
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">{t.auth.email}</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-[#a0907c] uppercase tracking-wide">{t.auth.email}</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="border border-[#e8dfd5] rounded-lg px-3 py-2.5 text-sm text-[#1a1208] placeholder:text-[#c4b5a5] focus:outline-none focus:border-[#b07040] transition-colors"
               autoComplete="email"
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">{t.auth.username}</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-[#a0907c] uppercase tracking-wide">{t.auth.username}</label>
             <input
               type="text"
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="border border-[#e8dfd5] rounded-lg px-3 py-2.5 text-sm text-[#1a1208] placeholder:text-[#c4b5a5] focus:outline-none focus:border-[#b07040] transition-colors"
               autoComplete="username"
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">{t.auth.password}</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-[#a0907c] uppercase tracking-wide">{t.auth.password}</label>
             <input
               type="password"
               required
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="border border-[#e8dfd5] rounded-lg px-3 py-2.5 text-sm text-[#1a1208] placeholder:text-[#c4b5a5] focus:outline-none focus:border-[#b07040] transition-colors"
               autoComplete="new-password"
             />
           </div>
@@ -91,15 +91,15 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold rounded-lg px-4 py-2 text-sm transition-colors"
+            className="mt-1 bg-[#b07040] hover:bg-[#8f5a32] disabled:opacity-40 text-white font-medium rounded-lg px-4 py-2.5 text-sm transition-colors"
           >
             {loading ? t.common.loading : t.auth.register}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-[#9c8c7c] mt-5">
           {t.auth.hasAccount}{" "}
-          <Link href="/login" className="text-indigo-600 hover:underline font-medium">
+          <Link href="/login" className="text-[#4a3728] hover:text-[#1a1208] font-medium transition-colors">
             {t.auth.login}
           </Link>
         </p>

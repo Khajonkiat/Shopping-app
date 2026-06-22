@@ -10,6 +10,7 @@ import (
 
 const UserIDKey = "userID"
 const RoleKey = "role"
+const HouseholdIDKey = "householdID"
 
 func Auth(jwtSecret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -44,9 +45,11 @@ func Auth(jwtSecret string) gin.HandlerFunc {
 		}
 
 		role, _ := claims["role"].(string)
+		householdID, _ := claims["household_id"].(float64)
 
 		c.Set(UserIDKey, uint(userID))
 		c.Set(RoleKey, role)
+		c.Set(HouseholdIDKey, uint(householdID))
 		c.Next()
 	}
 }

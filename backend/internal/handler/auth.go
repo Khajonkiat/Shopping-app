@@ -11,12 +11,13 @@ import (
 )
 
 type AuthHandler struct {
-	svc       *service.UserService
-	jwtSecret string
+	svc          *service.UserService
+	householdSvc *service.HouseholdService
+	jwtSecret    string
 }
 
-func NewAuthHandler(svc *service.UserService, jwtSecret string) *AuthHandler {
-	return &AuthHandler{svc: svc, jwtSecret: jwtSecret}
+func NewAuthHandler(svc *service.UserService, householdSvc *service.HouseholdService, jwtSecret string) *AuthHandler {
+	return &AuthHandler{svc: svc, householdSvc: householdSvc, jwtSecret: jwtSecret}
 }
 
 type registerRequest struct {
@@ -47,16 +48,20 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	token, err := h.makeToken(user.ID, user.Email, user.Role)
+	household, err := h.householdSvc.Create(req.Username+"'s Home", user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	token, err := h.makeToken(user.ID, user.Email, user.Role, household.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate token"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"token": token,
-		"user":  user,
-	})
+	user.HouseholdID = household.ID
+	c.JSON(http.StatusCreated, gin.H{"token": token, "user": user})
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
@@ -76,24 +81,32 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.makeToken(user.ID, user.Email, user.Role)
+	// Auto-create a household for users who pre-date multi-tenancy.
+	if user.HouseholdID == 0 {
+		household, err := h.householdSvc.Create(user.Username+"'s Home", user.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		user.HouseholdID = household.ID
+	}
+
+	token, err := h.makeToken(user.ID, user.Email, user.Role, user.HouseholdID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate token"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"token": token,
-		"user":  user,
-	})
+	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
 }
 
-func (h *AuthHandler) makeToken(userID uint, email, role string) (string, error) {
+func (h *AuthHandler) makeToken(userID uint, email, role string, householdID uint) (string, error) {
 	claims := jwt.MapClaims{
-		"user_id": userID,
-		"email":   email,
-		"role":    role,
-		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(),
+		"user_id":      userID,
+		"email":        email,
+		"role":         role,
+		"household_id": householdID,
+		"exp":          time.Now().Add(7 * 24 * time.Hour).Unix(),
 	}
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(h.jwtSecret))
 }

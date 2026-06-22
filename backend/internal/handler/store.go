@@ -19,7 +19,7 @@ func NewStoreHandler(svc *service.StoreService) *StoreHandler {
 }
 
 func (h *StoreHandler) List(c *gin.Context) {
-	stores, err := h.svc.List()
+	stores, err := h.svc.List(getHouseholdID(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -32,7 +32,7 @@ func (h *StoreHandler) Get(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	store, err := h.svc.GetByID(id)
+	store, err := h.svc.GetByID(id, getHouseholdID(c))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "store not found"})
@@ -50,6 +50,7 @@ func (h *StoreHandler) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	store.HouseholdID = getHouseholdID(c)
 	if err := h.svc.Create(&store); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -67,7 +68,7 @@ func (h *StoreHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	store, err := h.svc.Update(id, updates)
+	store, err := h.svc.Update(id, getHouseholdID(c), updates)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "store not found"})
@@ -84,7 +85,7 @@ func (h *StoreHandler) Delete(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	if err := h.svc.Delete(id); err != nil {
+	if err := h.svc.Delete(id, getHouseholdID(c)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
