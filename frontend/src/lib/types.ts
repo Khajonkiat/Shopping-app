@@ -1,3 +1,13 @@
+export interface AdminUser {
+  id: number;
+  email: string;
+  username: string;
+  role: string;
+  household_id: number;
+  household_name: string;
+  created_at: string;
+}
+
 export interface Household {
   id: number;
   name: string;

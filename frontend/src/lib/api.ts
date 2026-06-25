@@ -1,4 +1,4 @@
-import type { Household, HouseholdInvite, PriceEntry, Product, ProductImage, Purchase, Store } from "./types";
+import type { AdminUser, Household, HouseholdInvite, PriceEntry, Product, ProductImage, Purchase, Store } from "./types";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
@@ -123,6 +123,24 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ code }),
       }),
+  },
+
+  admin: {
+    users: {
+      list: () => request<AdminUser[]>("/admin/users"),
+      update: (id: number, data: { username: string; email: string; role: string; password: string }) =>
+        request<AdminUser>(`/admin/users/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify(data),
+        }),
+      updateRole: (id: number, role: string) =>
+        request<AdminUser>(`/admin/users/${id}/role`, {
+          method: "PATCH",
+          body: JSON.stringify({ role }),
+        }),
+      delete: (id: number) =>
+        request<void>(`/admin/users/${id}`, { method: "DELETE" }),
+    },
   },
 
   images: {

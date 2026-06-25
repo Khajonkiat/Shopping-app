@@ -25,6 +25,7 @@ func Setup(db *gorm.DB, uploadDir string, jwtSecret string) *gin.Engine {
 	imageSvc := service.NewProductImageService(db)
 
 	authH := handler.NewAuthHandler(userSvc, householdSvc, jwtSecret)
+	adminH := handler.NewAdminHandler(userSvc)
 	householdH := handler.NewHouseholdHandler(householdSvc)
 	productH := handler.NewProductHandler(productSvc)
 	storeH := handler.NewStoreHandler(storeSvc)
@@ -45,6 +46,16 @@ func Setup(db *gorm.DB, uploadDir string, jwtSecret string) *gin.Engine {
 	protected := api.Group("")
 	protected.Use(middleware.Auth(jwtSecret))
 	{
+		// Admin — master role only
+		admin := protected.Group("/admin")
+		admin.Use(middleware.RequireRole("master"))
+		{
+			admin.GET("/users", adminH.ListUsers)
+			admin.PATCH("/users/:id", adminH.UpdateUser)
+			admin.PATCH("/users/:id/role", adminH.UpdateUserRole)
+			admin.DELETE("/users/:id", adminH.DeleteUser)
+		}
+
 		// Household
 		household := protected.Group("/household")
 		{

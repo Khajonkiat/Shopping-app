@@ -7,6 +7,25 @@ export interface Translations {
     stores: string;
     purchases: string;
     household: string;
+    users: string;
+  };
+  admin: {
+    title: string;
+    noData: string;
+    confirmDelete: string;
+    confirmRoleChange: string;
+    selfTooltip: string;
+    editTitle: string;
+    passwordHint: string;
+    saveError: string;
+    col: {
+      username: string;
+      email: string;
+      role: string;
+      household: string;
+      joined: string;
+      actions: string;
+    };
   };
   common: {
     loading: string;

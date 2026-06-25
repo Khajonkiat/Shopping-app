@@ -9,7 +9,7 @@ import Logo from "./logo";
 export default function Nav() {
   const pathname = usePathname();
   const { t } = useLocale();
-  const { isLoggedIn, user, logout } = useAuth();
+  const { isLoggedIn, user, logout, isMaster } = useAuth();
   const router = useRouter();
 
   const links = [
@@ -18,6 +18,7 @@ export default function Nav() {
     { href: "/stores", label: t.nav.stores, exact: false },
     { href: "/purchases", label: t.nav.purchases, exact: false },
     { href: "/household", label: t.nav.household, exact: false },
+    ...(isMaster ? [{ href: "/admin/users", label: t.nav.users, exact: false }] : []),
   ];
 
   function handleLogout() {
