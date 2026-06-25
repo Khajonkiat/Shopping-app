@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Nav from "@/components/nav";
+import AppShell from "@/components/app-shell";
 import { LocaleProvider } from "@/components/locale-provider";
 import { AuthProvider } from "@/lib/auth";
 
@@ -16,13 +16,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col" style={{ background: "#faf5ef", color: "#1a1208" }}>
+      <body className="min-h-full" style={{ background: "#faf5ef", color: "#1a1208" }}>
         <AuthProvider>
           <LocaleProvider>
-            <Nav />
-            <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
-              {children}
-            </main>
+            <AppShell>{children}</AppShell>
           </LocaleProvider>
         </AuthProvider>
       </body>
