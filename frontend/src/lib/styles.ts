@@ -6,6 +6,7 @@ const warm = {
 };
 
 export const card = `${warm.bg} rounded-2xl border ${warm.border}`;
+export const editCard = `${warm.bg} rounded-2xl border border-[#d4b896] ring-2 ring-[#d4b896]/30`;
 
 export const inputCls =
   `w-full bg-white border ${warm.border} rounded-lg px-3 py-2.5 text-sm text-[#1a1208] ` +

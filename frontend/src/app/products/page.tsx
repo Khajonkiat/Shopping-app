@@ -1,25 +1,36 @@
 "use client";
 import { useEffect, useState } from "react";
 import { api, imageUrl } from "@/lib/api";
-import { card, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/lib/styles";
+import { card, editCard, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/lib/styles";
 import type { Product } from "@/lib/types";
 import Link from "next/link";
 import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
+import { Toast } from "@/components/toast";
+import { Spinner } from "@/components/spinner";
+import { useToast } from "@/lib/use-toast";
 
 const emptyForm = { name: "", category: "", unit: "", description: "" };
 
 export default function ProductsPage() {
   const { t } = useLocale();
   const { ready } = useRequireAuth();
+  const { message: toastMsg, toast, dismiss } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState(emptyForm);
 
-  useEffect(() => { if (ready) api.products.list().then(setProducts).catch(() => {}); }, [ready]);
+  useEffect(() => {
+    if (!ready) return;
+    api.products.list()
+      .then(setProducts)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [ready]);
 
   function set(field: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -53,6 +64,7 @@ export default function ProductsPage() {
     setProducts((prev) => [...prev, p]);
     setForm(emptyForm);
     setShowForm(false);
+    toast(t.common.toastSaved);
   }
 
   async function handleUpdate(e: React.FormEvent) {
@@ -61,6 +73,7 @@ export default function ProductsPage() {
     const updated = await api.products.update(editingId, editForm);
     setProducts((prev) => prev.map((p) => p.id === editingId ? { ...p, ...updated } : p));
     cancelEdit();
+    toast(t.common.toastUpdated);
   }
 
   async function handleDelete(id: number) {
@@ -68,16 +81,18 @@ export default function ProductsPage() {
     await api.products.delete(id);
     setProducts((prev) => prev.filter((p) => p.id !== id));
     if (editingId === id) cancelEdit();
+    toast(t.common.toastDeleted);
   }
 
   if (!ready) return null;
+  if (loading) return <Spinner />;
 
   return (
     <div className="space-y-8">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-[#1a1208]">{t.products.title}</h1>
-          <p className="text-sm text-[#7a6858] mt-1">{products.length} {products.length === 1 ? "item" : "items"}</p>
+          <p className="text-sm text-[#7a6858] mt-1">{products.length} {t.products.recordsSuffix}</p>
         </div>
         <button
           className={showForm ? btnSecondary : btnPrimary}
@@ -89,7 +104,7 @@ export default function ProductsPage() {
 
       {showForm && (
         <div className={`${card} p-6`}>
-          <h3 className="text-sm font-semibold text-[#4a3728] mb-5">New product</h3>
+          <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.products.formNew}</h3>
           <form onSubmit={handleCreate} className="space-y-5">
             <div className="grid grid-cols-2 gap-5">
               <div>
@@ -118,8 +133,8 @@ export default function ProductsPage() {
       )}
 
       {editingId !== null && (
-        <div className={`${card} p-6 ring-[#d4b896]/60`}>
-          <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Edit product</h3>
+        <div className={`${editCard} p-6`}>
+          <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.products.formEdit}</h3>
           <form onSubmit={handleUpdate} className="space-y-5">
             <div className="grid grid-cols-2 gap-5">
               <div>
@@ -212,6 +227,8 @@ export default function ProductsPage() {
           </tbody>
         </table>
       </div>
+
+      {toastMsg && <Toast message={toastMsg} onDismiss={dismiss} />}
     </div>
   );
 }

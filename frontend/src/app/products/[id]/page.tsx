@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { api, imageUrl } from "@/lib/api";
-import { card, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/lib/styles";
+import { card, editCard, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/lib/styles";
 import type { PriceEntry, Product, ProductImage, Purchase, Store } from "@/lib/types";
 import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
+import { Toast } from "@/components/toast";
+import { useToast } from "@/lib/use-toast";
 
 function toISO(dateStr: string): string | undefined {
   return dateStr ? `${dateStr}T00:00:00Z` : undefined;
@@ -20,6 +22,7 @@ function toDateInput(iso: string | undefined): string {
 export default function ProductDetailPage() {
   const { t } = useLocale();
   const { ready } = useRequireAuth();
+  const { message: toastMsg, toast, dismiss } = useToast();
   const { id } = useParams<{ id: string }>();
   const productId = Number(id);
 
@@ -94,6 +97,7 @@ export default function ProductDetailPage() {
       }, ...prev]);
       setPriceForm({ store_id: "", price: "", recorded_at: "" });
       setShowPriceForm(false);
+      toast(t.common.toastSaved);
     } catch (err) {
       setPriceError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -137,11 +141,20 @@ export default function ProductDetailPage() {
           : p
       ));
       cancelEditPrice();
+      toast(t.common.toastUpdated);
     } catch (err) {
       setEditPriceError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setEditPriceSubmitting(false);
     }
+  }
+
+  async function handleDeletePrice(id: number) {
+    if (!confirm(t.productDetail.confirmDeletePrice)) return;
+    await api.prices.delete(id);
+    setPrices((prev) => prev.filter((x) => x.id !== id));
+    if (editingPriceId === id) cancelEditPrice();
+    toast(t.common.toastDeleted);
   }
 
   // Purchase CRUD
@@ -165,6 +178,7 @@ export default function ProductDetailPage() {
       }, ...prev]);
       setPurchaseForm({ store_id: "", price: "", quantity: "1", purchased_at: "", notes: "" });
       setShowPurchaseForm(false);
+      toast(t.common.toastSaved);
     } catch (err) {
       setPurchaseError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -212,11 +226,20 @@ export default function ProductDetailPage() {
           : p
       ));
       cancelEditPurchase();
+      toast(t.common.toastUpdated);
     } catch (err) {
       setEditPurchaseError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setEditPurchaseSubmitting(false);
     }
+  }
+
+  async function handleDeletePurchase(id: number) {
+    if (!confirm(t.productDetail.confirmDeletePurchase)) return;
+    await api.purchases.delete(id);
+    setPurchases((prev) => prev.filter((x) => x.id !== id));
+    if (editingPurchaseId === id) cancelEditPurchase();
+    toast(t.common.toastDeleted);
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -227,6 +250,7 @@ export default function ProductDetailPage() {
     try {
       const img = await api.images.upload(productId, file);
       setImages((prev) => [...prev, img]);
+      toast(t.common.toastSaved);
     } catch (err) {
       setImageError(err instanceof Error ? err.message : "Upload failed");
     } finally {
@@ -238,6 +262,7 @@ export default function ProductDetailPage() {
   async function handleImageDelete(img: ProductImage) {
     await api.images.delete(img.id);
     setImages((prev) => prev.filter((x) => x.id !== img.id));
+    toast(t.common.toastDeleted);
   }
 
   const latestPerStore = stores
@@ -253,7 +278,7 @@ export default function ProductDetailPage() {
   if (!ready || !product) {
     return (
       <div className="flex items-center justify-center h-48">
-        <p className="text-[#a0907c] text-sm">{t.common.loading}</p>
+        <div className="w-5 h-5 rounded-full border-2 border-[#e8dfd5] border-t-[#b07040] animate-spin" />
       </div>
     );
   }
@@ -298,7 +323,7 @@ export default function ProductDetailPage() {
             <div
               key={store.id}
               className={`${card} px-5 py-4 min-w-[120px] ${
-                i === 0 ? "ring-emerald-300/70 shadow-emerald-100" : ""
+                i === 0 ? "border-emerald-200" : ""
               }`}
             >
               <div className="text-xs font-medium text-[#a0907c] mb-1">{store.name}</div>
@@ -352,7 +377,7 @@ export default function ProductDetailPage() {
 
           {showPriceForm && (
             <div className={`${card} p-6`}>
-              <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Record price</h3>
+              <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.productDetail.formRecordPrice}</h3>
               <form onSubmit={handleAddPrice} noValidate className="space-y-5">
                 <div className="grid grid-cols-3 gap-5">
                   <div>
@@ -407,7 +432,7 @@ export default function ProductDetailPage() {
                     className={btnPrimary}
                     disabled={!canSubmitPrice || priceSubmitting}
                   >
-                    {priceSubmitting ? "Saving…" : t.common.save}
+                    {priceSubmitting ? t.common.saving : t.common.save}
                   </button>
                 </div>
               </form>
@@ -415,8 +440,8 @@ export default function ProductDetailPage() {
           )}
 
           {editingPriceId !== null && (
-            <div className={`${card} p-6 ring-[#d4b896]/60`}>
-              <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Edit price</h3>
+            <div className={`${editCard} p-6`}>
+              <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.productDetail.formEditPrice}</h3>
               <form onSubmit={handleUpdatePrice} noValidate className="space-y-5">
                 <div className="grid grid-cols-3 gap-5">
                   <div>
@@ -465,7 +490,7 @@ export default function ProductDetailPage() {
                     className={btnPrimary}
                     disabled={!canEditPrice || editPriceSubmitting}
                   >
-                    {editPriceSubmitting ? "Saving…" : t.common.save}
+                    {editPriceSubmitting ? t.common.saving : t.common.save}
                   </button>
                 </div>
               </form>
@@ -513,11 +538,7 @@ export default function ProductDetailPage() {
                           {editingPriceId === p.id ? t.common.cancel : t.common.edit}
                         </button>
                         <button
-                          onClick={async () => {
-                            await api.prices.delete(p.id);
-                            setPrices((prev) => prev.filter((x) => x.id !== p.id));
-                            if (editingPriceId === p.id) cancelEditPrice();
-                          }}
+                          onClick={() => handleDeletePrice(p.id)}
                           className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors"
                         >
                           {t.common.delete}
@@ -546,7 +567,7 @@ export default function ProductDetailPage() {
 
           {showPurchaseForm && (
             <div className={`${card} p-6`}>
-              <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Record purchase</h3>
+              <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.productDetail.formRecordPurchase}</h3>
               <form onSubmit={handleAddPurchase} noValidate className="space-y-5">
                 <div className="grid grid-cols-3 gap-5">
                   <div>
@@ -620,7 +641,7 @@ export default function ProductDetailPage() {
                     className={btnPrimary}
                     disabled={!canSubmitPurchase || purchaseSubmitting}
                   >
-                    {purchaseSubmitting ? "Saving…" : t.common.save}
+                    {purchaseSubmitting ? t.common.saving : t.common.save}
                   </button>
                 </div>
               </form>
@@ -628,8 +649,8 @@ export default function ProductDetailPage() {
           )}
 
           {editingPurchaseId !== null && (
-            <div className={`${card} p-6 ring-[#d4b896]/60`}>
-              <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Edit purchase</h3>
+            <div className={`${editCard} p-6`}>
+              <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.productDetail.formEditPurchase}</h3>
               <form onSubmit={handleUpdatePurchase} noValidate className="space-y-5">
                 <div className="grid grid-cols-3 gap-5">
                   <div>
@@ -697,7 +718,7 @@ export default function ProductDetailPage() {
                     className={btnPrimary}
                     disabled={!canEditPurchase || editPurchaseSubmitting}
                   >
-                    {editPurchaseSubmitting ? "Saving…" : t.common.save}
+                    {editPurchaseSubmitting ? t.common.saving : t.common.save}
                   </button>
                 </div>
               </form>
@@ -741,11 +762,7 @@ export default function ProductDetailPage() {
                           {editingPurchaseId === p.id ? t.common.cancel : t.common.edit}
                         </button>
                         <button
-                          onClick={async () => {
-                            await api.purchases.delete(p.id);
-                            setPurchases((prev) => prev.filter((x) => x.id !== p.id));
-                            if (editingPurchaseId === p.id) cancelEditPurchase();
-                          }}
+                          onClick={() => handleDeletePurchase(p.id)}
                           className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors"
                         >
                           {t.common.delete}
@@ -766,7 +783,7 @@ export default function ProductDetailPage() {
           <div className="flex items-center justify-between">
             <p className="text-sm text-[#7a6858]">{images.length} {t.productDetail.imagesTab}</p>
             <label className={`${btnPrimary} cursor-pointer`}>
-              {imageUploading ? "Uploading…" : t.productDetail.uploadImage}
+              {imageUploading ? t.common.saving : t.productDetail.uploadImage}
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/gif,image/webp"
@@ -810,6 +827,8 @@ export default function ProductDetailPage() {
           )}
         </div>
       )}
+
+      {toastMsg && <Toast message={toastMsg} onDismiss={dismiss} />}
     </div>
   );
 }

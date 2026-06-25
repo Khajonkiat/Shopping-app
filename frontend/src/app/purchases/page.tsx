@@ -1,10 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { card, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/lib/styles";
+import { card, editCard, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/lib/styles";
 import type { Product, Purchase, Store } from "@/lib/types";
 import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
+import { Toast } from "@/components/toast";
+import { Spinner } from "@/components/spinner";
+import { useToast } from "@/lib/use-toast";
 
 function toISO(dateStr: string): string | undefined {
   return dateStr ? `${dateStr}T00:00:00Z` : undefined;
@@ -20,9 +23,11 @@ const emptyForm = { product_id: "", store_id: "", price: "", quantity: "1", purc
 export default function PurchasesPage() {
   const { t } = useLocale();
   const { ready } = useRequireAuth();
+  const { message: toastMsg, toast, dismiss } = useToast();
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Store[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,9 +40,10 @@ export default function PurchasesPage() {
 
   useEffect(() => {
     if (!ready) return;
-    api.purchases.list().then(setPurchases).catch(() => {});
-    api.products.list().then(setProducts).catch(() => {});
-    api.stores.list().then(setStores).catch(() => {});
+    Promise.all([api.purchases.list(), api.products.list(), api.stores.list()])
+      .then(([pu, p, s]) => { setPurchases(pu); setProducts(p); setStores(s); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [ready]);
 
   const canSubmit = Number(form.product_id) > 0 && Number(form.store_id) > 0 && Number(form.price) > 0;
@@ -85,6 +91,7 @@ export default function PurchasesPage() {
       }, ...prev]);
       setForm(emptyForm);
       setShowForm(false);
+      toast(t.common.toastSaved);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -113,6 +120,7 @@ export default function PurchasesPage() {
           : p
       ));
       cancelEdit();
+      toast(t.common.toastUpdated);
     } catch (err) {
       setEditError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -120,9 +128,18 @@ export default function PurchasesPage() {
     }
   }
 
+  async function handleDelete(id: number) {
+    if (!confirm(t.purchases.confirmDelete)) return;
+    await api.purchases.delete(id);
+    setPurchases((prev) => prev.filter((x) => x.id !== id));
+    if (editingId === id) cancelEdit();
+    toast(t.common.toastDeleted);
+  }
+
   const totalSpend = purchases.reduce((sum, p) => sum + p.price * p.quantity, 0);
 
   if (!ready) return null;
+  if (loading) return <Spinner />;
 
   return (
     <div className="space-y-8">
@@ -151,7 +168,7 @@ export default function PurchasesPage() {
 
       {showForm && (
         <div className={`${card} p-6`}>
-          <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Record purchase</h3>
+          <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.purchases.formRecord}</h3>
           <form onSubmit={handleCreate} noValidate className="space-y-5">
             <div className="grid grid-cols-3 gap-5">
               <div>
@@ -238,7 +255,7 @@ export default function PurchasesPage() {
                 className={btnPrimary}
                 disabled={!canSubmit || submitting}
               >
-                {submitting ? "Saving…" : t.common.save}
+                {submitting ? t.common.saving : t.common.save}
               </button>
             </div>
           </form>
@@ -246,8 +263,8 @@ export default function PurchasesPage() {
       )}
 
       {editingId !== null && (
-        <div className={`${card} p-6 ring-[#d4b896]/60`}>
-          <h3 className="text-sm font-semibold text-[#4a3728] mb-5">Edit purchase</h3>
+        <div className={`${editCard} p-6`}>
+          <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.purchases.formEdit}</h3>
           <form onSubmit={handleUpdate} noValidate className="space-y-5">
             <div className="grid grid-cols-3 gap-5">
               <div>
@@ -328,7 +345,7 @@ export default function PurchasesPage() {
                 className={btnPrimary}
                 disabled={!canEditSubmit || editSubmitting}
               >
-                {editSubmitting ? "Saving…" : t.common.save}
+                {editSubmitting ? t.common.saving : t.common.save}
               </button>
             </div>
           </form>
@@ -374,11 +391,7 @@ export default function PurchasesPage() {
                       {editingId === p.id ? t.common.cancel : t.common.edit}
                     </button>
                     <button
-                      onClick={async () => {
-                        await api.purchases.delete(p.id);
-                        setPurchases((prev) => prev.filter((x) => x.id !== p.id));
-                        if (editingId === p.id) cancelEdit();
-                      }}
+                      onClick={() => handleDelete(p.id)}
                       className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors"
                     >
                       {t.common.delete}
@@ -390,6 +403,8 @@ export default function PurchasesPage() {
           </tbody>
         </table>
       </div>
+
+      {toastMsg && <Toast message={toastMsg} onDismiss={dismiss} />}
     </div>
   );
 }

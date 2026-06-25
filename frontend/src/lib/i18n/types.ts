@@ -29,11 +29,13 @@ export interface Translations {
   };
   common: {
     loading: string;
+    saving: string;
     cancel: string;
     delete: string;
     edit: string;
     save: string;
     create: string;
+    copy: string;
     optional: string;
     dash: string;
     // form labels
@@ -53,6 +55,10 @@ export interface Translations {
     // select placeholders
     selectStore: string;
     selectProduct: string;
+    // toast messages
+    toastSaved: string;
+    toastUpdated: string;
+    toastDeleted: string;
   };
   dashboard: {
     title: string;
@@ -78,6 +84,9 @@ export interface Translations {
     unitPlaceholder: string;
     noData: string;
     confirmDelete: string;
+    formNew: string;
+    formEdit: string;
+    recordsSuffix: string;
   };
   productDetail: {
     back: string;
@@ -93,6 +102,12 @@ export interface Translations {
     uploadImage: string;
     sourceManual: string;
     sourceScraped: string;
+    formRecordPrice: string;
+    formEditPrice: string;
+    formRecordPurchase: string;
+    formEditPurchase: string;
+    confirmDeletePrice: string;
+    confirmDeletePurchase: string;
   };
   stores: {
     title: string;
@@ -100,6 +115,9 @@ export interface Translations {
     namePlaceholder: string;
     noData: string;
     confirmDelete: string;
+    formNew: string;
+    formEdit: string;
+    recordsSuffix: string;
   };
   purchases: {
     title: string;
@@ -107,6 +125,9 @@ export interface Translations {
     recordsSuffix: string;
     totalSuffix: string;
     noData: string;
+    formRecord: string;
+    formEdit: string;
+    confirmDelete: string;
   };
   household: {
     title: string;

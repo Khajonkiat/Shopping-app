@@ -115,7 +115,7 @@ export default function HouseholdPage() {
                     onClick={handleCopy}
                     className="shrink-0 text-xs text-[#b07040] hover:text-[#8f5a32] font-semibold px-3 py-2 border border-[#d4b896] rounded-lg hover:bg-[#f7f0e8] transition-colors"
                   >
-                    {copied ? t.household.inviteCopied : "Copy"}
+                    {copied ? t.household.inviteCopied : t.common.copy}
                   </button>
                 </div>
               )}
