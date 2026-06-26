@@ -1,4 +1,4 @@
-# Deploy Frontend
+# Deploy Frontend (rebuild)
 name: Deploy Frontend
 
 on:
