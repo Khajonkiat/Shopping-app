@@ -31,6 +31,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set version
+        id: version
+        run: echo "VERSION=$(date +'%Y%m%d').${{ github.run_number }}" >> $GITHUB_OUTPUT
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -38,7 +42,7 @@ jobs:
           images: ${{ env.IMAGE }}
           tags: |
             type=raw,value=latest
-            type=sha,prefix=sha-
+            type=raw,value=${{ steps.version.outputs.VERSION }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
