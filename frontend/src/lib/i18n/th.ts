@@ -65,6 +65,11 @@ export const th: Translations = {
     viewAll: "ดูทั้งหมด →",
     noData: "ยังไม่มีรายการซื้อ",
     recordLink: "บันทึกรายการ →",
+    monthlySpend: "ยอดใช้จ่ายรายเดือน",
+    thisMonth: "เดือนนี้",
+    lastMonth: "เดือนที่แล้ว",
+    vsLastMonth: "เทียบเดือนที่แล้ว",
+    monthBreakdown: "สรุปรายเดือน",
     col: {
       product: "สินค้า",
       store: "ร้านค้า",

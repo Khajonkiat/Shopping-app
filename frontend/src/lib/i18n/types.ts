@@ -68,6 +68,11 @@ export interface Translations {
     viewAll: string;
     noData: string;
     recordLink: string;
+    monthlySpend: string;
+    thisMonth: string;
+    lastMonth: string;
+    vsLastMonth: string;
+    monthBreakdown: string;
     col: {
       product: string;
       store: string;

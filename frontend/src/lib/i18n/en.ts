@@ -65,6 +65,11 @@ export const en: Translations = {
     viewAll: "View all →",
     noData: "No purchases yet.",
     recordLink: "Record one →",
+    monthlySpend: "Monthly spending",
+    thisMonth: "This month",
+    lastMonth: "Last month",
+    vsLastMonth: "vs last month",
+    monthBreakdown: "Monthly breakdown",
     col: {
       product: "Product",
       store: "Store",
