@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { api, imageUrl } from "@/lib/api";
 import { card, editCard, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/lib/styles";
-import type { Product } from "@/lib/types";
+import type { Product, ProductImage } from "@/lib/types";
 import Link from "next/link";
 import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
@@ -23,6 +23,11 @@ export default function ProductsPage() {
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState(emptyForm);
+
+  const [pendingCreateImage, setPendingCreateImage] = useState<File | null>(null);
+  const [createImagePreview, setCreateImagePreview] = useState<string | null>(null);
+  const [editImageUploading, setEditImageUploading] = useState(false);
+  const [editImageError, setEditImageError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!ready) return;
@@ -56,13 +61,55 @@ export default function ProductsPage() {
   function cancelEdit() {
     setEditingId(null);
     setEditForm(emptyForm);
+    setEditImageError(null);
+  }
+
+  function handlePendingImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPendingCreateImage(file);
+    setCreateImagePreview(URL.createObjectURL(file));
+  }
+
+  async function handleEditImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    const id = editingId;
+    if (!file || !id) return;
+    setEditImageUploading(true);
+    setEditImageError(null);
+    try {
+      const img = await api.images.upload(id, file);
+      setProducts((prev) => prev.map((p) => p.id === id ? { ...p, images: [...(p.images ?? []), img] } : p));
+      toast(t.common.toastSaved);
+    } catch (err) {
+      setEditImageError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setEditImageUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  async function handleEditImageDelete(imageId: number) {
+    const id = editingId;
+    if (!id) return;
+    await api.images.delete(imageId);
+    setProducts((prev) => prev.map((p) => p.id === id ? { ...p, images: (p.images ?? []).filter((img: ProductImage) => img.id !== imageId) } : p));
   }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     const p = await api.products.create(form);
-    setProducts((prev) => [...prev, p]);
+    let productWithImages: Product = p;
+    if (pendingCreateImage) {
+      try {
+        const img = await api.images.upload(p.id, pendingCreateImage);
+        productWithImages = { ...p, images: [img] };
+      } catch {}
+    }
+    setProducts((prev) => [...prev, productWithImages]);
     setForm(emptyForm);
+    setPendingCreateImage(null);
+    setCreateImagePreview(null);
     setShowForm(false);
     toast(t.common.toastSaved);
   }
@@ -123,6 +170,32 @@ export default function ProductsPage() {
                 <label className={labelCls}>{t.common.description}</label>
                 <input className={inputCls} value={form.description} onChange={set("description")} />
               </div>
+              <div className="col-span-2">
+                <label className={labelCls}>{t.productDetail.uploadImage}</label>
+                <div className="flex items-center gap-4 mt-1">
+                  {createImagePreview && (
+                    <img src={createImagePreview} alt="" className="w-14 h-14 rounded-lg object-cover border border-[#e8dfd5] shrink-0" />
+                  )}
+                  <label className={`${btnSecondary} cursor-pointer shrink-0`}>
+                    {pendingCreateImage ? pendingCreateImage.name : t.productDetail.uploadImage}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/gif,image/webp"
+                      className="hidden"
+                      onChange={handlePendingImageSelect}
+                    />
+                  </label>
+                  {pendingCreateImage && (
+                    <button
+                      type="button"
+                      className="text-xs text-[#a0907c] hover:text-rose-500 transition-colors"
+                      onClick={() => { setPendingCreateImage(null); setCreateImagePreview(null); }}
+                    >
+                      {t.common.delete}
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
             <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
               <button type="button" className={btnSecondary} onClick={() => setShowForm(false)}>{t.common.cancel}</button>
@@ -152,6 +225,40 @@ export default function ProductsPage() {
               <div>
                 <label className={labelCls}>{t.common.description}</label>
                 <input className={inputCls} value={editForm.description} onChange={setEdit("description")} />
+              </div>
+              <div className="col-span-2">
+                <label className={labelCls}>{t.productDetail.imagesTab}</label>
+                <div className="space-y-3 mt-1">
+                  {(products.find((p) => p.id === editingId)?.images ?? []).length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {(products.find((p) => p.id === editingId)?.images ?? []).map((img: ProductImage) => (
+                        <div key={img.id} className="relative group">
+                          <img src={imageUrl(img.filename)} alt="" className="w-14 h-14 rounded-lg object-cover border border-[#e8dfd5]" />
+                          <button
+                            type="button"
+                            onClick={() => handleEditImageDelete(img.id)}
+                            className="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs transition-opacity"
+                          >
+                            {t.common.delete}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3">
+                    <label className={`${btnSecondary} cursor-pointer ${editImageUploading ? "opacity-50 pointer-events-none" : ""}`}>
+                      {editImageUploading ? t.common.saving : t.productDetail.uploadImage}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        className="hidden"
+                        disabled={editImageUploading}
+                        onChange={handleEditImageUpload}
+                      />
+                    </label>
+                    {editImageError && <p className="text-xs text-rose-600">{editImageError}</p>}
+                  </div>
+                </div>
               </div>
             </div>
             <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
