@@ -156,5 +156,8 @@ export const th: Translations = {
     hasAccount: "มีบัญชีอยู่แล้ว?",
     loginError: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
     registerError: "ไม่สามารถสร้างบัญชีได้",
+    accountTitle: "ตั้งค่าบัญชี",
+    passwordHint: "ปล่อยว่างเพื่อเก็บรหัสผ่านเดิม",
+    accountSaved: "อัปเดตบัญชีแล้ว กรุณาเข้าสู่ระบบใหม่เพื่อดูชื่อที่เปลี่ยน",
   },
 };

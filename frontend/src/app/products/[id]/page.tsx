@@ -9,6 +9,7 @@ import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { Toast } from "@/components/toast";
 import { useToast } from "@/lib/use-toast";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 function toISO(dateStr: string): string | undefined {
   return dateStr ? `${dateStr}T00:00:00Z` : undefined;
@@ -63,6 +64,10 @@ export default function ProductDetailPage() {
   });
   const [editPurchaseSubmitting, setEditPurchaseSubmitting] = useState(false);
   const [editPurchaseError, setEditPurchaseError] = useState<string | null>(null);
+
+  // --- Pending deletes ---
+  const [pendingDeletePriceId, setPendingDeletePriceId] = useState<number | null>(null);
+  const [pendingDeletePurchaseId, setPendingDeletePurchaseId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!ready) return;
@@ -150,10 +155,10 @@ export default function ProductDetailPage() {
   }
 
   async function handleDeletePrice(id: number) {
-    if (!confirm(t.productDetail.confirmDeletePrice)) return;
     await api.prices.delete(id);
     setPrices((prev) => prev.filter((x) => x.id !== id));
     if (editingPriceId === id) cancelEditPrice();
+    setPendingDeletePriceId(null);
     toast(t.common.toastDeleted);
   }
 
@@ -235,10 +240,10 @@ export default function ProductDetailPage() {
   }
 
   async function handleDeletePurchase(id: number) {
-    if (!confirm(t.productDetail.confirmDeletePurchase)) return;
     await api.purchases.delete(id);
     setPurchases((prev) => prev.filter((x) => x.id !== id));
     if (editingPurchaseId === id) cancelEditPurchase();
+    setPendingDeletePurchaseId(null);
     toast(t.common.toastDeleted);
   }
 
@@ -537,10 +542,7 @@ export default function ProductDetailPage() {
                         >
                           {editingPriceId === p.id ? t.common.cancel : t.common.edit}
                         </button>
-                        <button
-                          onClick={() => handleDeletePrice(p.id)}
-                          className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors"
-                        >
+                        <button onClick={() => setPendingDeletePriceId(p.id)} className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors">
                           {t.common.delete}
                         </button>
                       </div>
@@ -761,10 +763,7 @@ export default function ProductDetailPage() {
                         >
                           {editingPurchaseId === p.id ? t.common.cancel : t.common.edit}
                         </button>
-                        <button
-                          onClick={() => handleDeletePurchase(p.id)}
-                          className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors"
-                        >
+                        <button onClick={() => setPendingDeletePurchaseId(p.id)} className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors">
                           {t.common.delete}
                         </button>
                       </div>
@@ -828,6 +827,24 @@ export default function ProductDetailPage() {
         </div>
       )}
 
+      {pendingDeletePriceId !== null && (
+        <ConfirmDialog
+          message={t.productDetail.confirmDeletePrice}
+          confirmLabel={t.common.delete}
+          cancelLabel={t.common.cancel}
+          onConfirm={() => handleDeletePrice(pendingDeletePriceId)}
+          onCancel={() => setPendingDeletePriceId(null)}
+        />
+      )}
+      {pendingDeletePurchaseId !== null && (
+        <ConfirmDialog
+          message={t.productDetail.confirmDeletePurchase}
+          confirmLabel={t.common.delete}
+          cancelLabel={t.common.cancel}
+          onConfirm={() => handleDeletePurchase(pendingDeletePurchaseId)}
+          onCancel={() => setPendingDeletePurchaseId(null)}
+        />
+      )}
       {toastMsg && <Toast message={toastMsg} onDismiss={dismiss} />}
     </div>
   );

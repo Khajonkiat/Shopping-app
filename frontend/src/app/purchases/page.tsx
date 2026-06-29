@@ -8,6 +8,7 @@ import { useRequireAuth } from "@/lib/use-require-auth";
 import { Toast } from "@/components/toast";
 import { Spinner } from "@/components/spinner";
 import { useToast } from "@/lib/use-toast";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 function toISO(dateStr: string): string | undefined {
   return dateStr ? `${dateStr}T00:00:00Z` : undefined;
@@ -37,6 +38,7 @@ export default function PurchasesPage() {
   const [editForm, setEditForm] = useState(emptyForm);
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!ready) return;
@@ -129,10 +131,10 @@ export default function PurchasesPage() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm(t.purchases.confirmDelete)) return;
     await api.purchases.delete(id);
     setPurchases((prev) => prev.filter((x) => x.id !== id));
     if (editingId === id) cancelEdit();
+    setPendingDeleteId(null);
     toast(t.common.toastDeleted);
   }
 
@@ -390,10 +392,7 @@ export default function PurchasesPage() {
                     >
                       {editingId === p.id ? t.common.cancel : t.common.edit}
                     </button>
-                    <button
-                      onClick={() => handleDelete(p.id)}
-                      className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors"
-                    >
+                    <button onClick={() => setPendingDeleteId(p.id)} className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors">
                       {t.common.delete}
                     </button>
                   </div>
@@ -404,6 +403,15 @@ export default function PurchasesPage() {
         </table>
       </div>
 
+      {pendingDeleteId !== null && (
+        <ConfirmDialog
+          message={t.purchases.confirmDelete}
+          confirmLabel={t.common.delete}
+          cancelLabel={t.common.cancel}
+          onConfirm={() => handleDelete(pendingDeleteId)}
+          onCancel={() => setPendingDeleteId(null)}
+        />
+      )}
       {toastMsg && <Toast message={toastMsg} onDismiss={dismiss} />}
     </div>
   );

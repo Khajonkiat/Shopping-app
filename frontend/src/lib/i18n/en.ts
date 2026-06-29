@@ -156,5 +156,8 @@ export const en: Translations = {
     hasAccount: "Already have an account?",
     loginError: "Invalid email or password.",
     registerError: "Could not create account.",
+    accountTitle: "Account Settings",
+    passwordHint: "Leave blank to keep current password",
+    accountSaved: "Account updated. Please log in again to see your new name.",
   },
 };

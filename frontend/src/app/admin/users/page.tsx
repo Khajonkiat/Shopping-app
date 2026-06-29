@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { useRequireMaster } from "@/lib/use-require-master";
 import { useLocale } from "@/components/locale-provider";
 import { card, inputCls, btnPrimary, btnSecondary, labelCls, th, td } from "@/lib/styles";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import type { AdminUser } from "@/lib/types";
 
 const roleBadge = (role: string) =>
@@ -27,6 +28,7 @@ export default function AdminUsersPage() {
   const [editForm, setEditForm] = useState(emptyEdit);
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState("");
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!ready) return;
@@ -64,14 +66,14 @@ export default function AdminUsersPage() {
     }
   }
 
-  async function handleDelete(u: AdminUser) {
-    if (!confirm(t.admin.confirmDelete)) return;
+  async function handleDelete(id: number) {
     try {
-      await api.admin.users.delete(u.id);
-      setUsers((prev) => prev.filter((x) => x.id !== u.id));
-      if (editingId === u.id) setEditingId(null);
+      await api.admin.users.delete(id);
+      setUsers((prev) => prev.filter((x) => x.id !== id));
+      if (editingId === id) setEditingId(null);
+      setPendingDeleteId(null);
     } catch {
-      alert("Failed to delete user.");
+      setPendingDeleteId(null);
     }
   }
 
@@ -224,7 +226,7 @@ export default function AdminUsersPage() {
                         )}
                         {!self && (
                           <button
-                            onClick={() => handleDelete(u)}
+                            onClick={() => setPendingDeleteId(u.id)}
                             className="text-xs font-medium px-3 py-1.5 rounded-lg border border-[#f0ddd5] text-[#c0503a] hover:bg-[#fdf0ee] hover:border-[#e0a09a] transition-colors"
                           >
                             {t.common.delete}
@@ -238,6 +240,15 @@ export default function AdminUsersPage() {
             </tbody>
           </table>
         </div>
+      )}
+      {pendingDeleteId !== null && (
+        <ConfirmDialog
+          message={t.admin.confirmDelete}
+          confirmLabel={t.common.delete}
+          cancelLabel={t.common.cancel}
+          onConfirm={() => handleDelete(pendingDeleteId)}
+          onCancel={() => setPendingDeleteId(null)}
+        />
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"time"
+	"wiki-shopping-app/backend/internal/middleware"
 	"wiki-shopping-app/backend/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -54,7 +55,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	token, err := h.makeToken(user.ID, user.Email, user.Role, household.ID)
+	token, err := h.makeToken(user.ID, user.Email, user.Username, user.Role, household.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate token"})
 		return
@@ -91,7 +92,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		user.HouseholdID = household.ID
 	}
 
-	token, err := h.makeToken(user.ID, user.Email, user.Role, user.HouseholdID)
+	token, err := h.makeToken(user.ID, user.Email, user.Username, user.Role, user.HouseholdID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate token"})
 		return
@@ -100,10 +101,38 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
 }
 
-func (h *AuthHandler) makeToken(userID uint, email, role string, householdID uint) (string, error) {
+func (h *AuthHandler) UpdateMe(c *gin.Context) {
+	userID, _ := c.Get(middleware.UserIDKey)
+
+	var body struct {
+		Username string `json:"username" binding:"required"`
+		Password string `json:"password"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := h.svc.UpdateSelf(userID.(uint), body.Username, body.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	token, err := h.makeToken(user.ID, user.Email, user.Username, user.Role, user.HouseholdID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
+}
+
+func (h *AuthHandler) makeToken(userID uint, email, username, role string, householdID uint) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id":      userID,
 		"email":        email,
+		"username":     username,
 		"role":         role,
 		"household_id": householdID,
 		"exp":          time.Now().Add(7 * 24 * time.Hour).Unix(),

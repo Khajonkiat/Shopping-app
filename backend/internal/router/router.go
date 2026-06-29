@@ -46,6 +46,9 @@ func Setup(db *gorm.DB, uploadDir string, jwtSecret string) *gin.Engine {
 	protected := api.Group("")
 	protected.Use(middleware.Auth(jwtSecret))
 	{
+		// Self-service account update (any authenticated user)
+		protected.PATCH("/auth/me", authH.UpdateMe)
+
 		// Admin — master role only
 		admin := protected.Group("/admin")
 		admin.Use(middleware.RequireRole("master"))
