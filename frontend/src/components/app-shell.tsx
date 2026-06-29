@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
 import TopBar from "./top-bar";
@@ -10,11 +10,20 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isLoggedIn } = useAuth();
 
+  useEffect(() => {
+    const stored = localStorage.getItem("sidebar_collapsed");
+    if (stored !== null) setCollapsed(stored === "true");
+  }, []);
+
   function handleToggle() {
     if (typeof window !== "undefined" && window.innerWidth < 640) {
       setMobileOpen((o) => !o);
     } else {
-      setCollapsed((c) => !c);
+      setCollapsed((c) => {
+        const next = !c;
+        localStorage.setItem("sidebar_collapsed", String(next));
+        return next;
+      });
     }
   }
 

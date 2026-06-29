@@ -48,7 +48,7 @@ export default function TopBar({ onToggle }: TopBarProps) {
         <LangSwitcher />
         {isLoggedIn ? (
           <>
-            <span className="text-[#a0907c] text-sm hidden md:block">{user?.username}</span>
+            <Link href="/account" className="text-[#a0907c] text-sm hidden md:block hover:text-[#1a1208] transition-colors">{user?.username}</Link>
             {user?.role === "master" && (
               <span className="text-xs font-medium px-2 py-0.5 rounded bg-[#e5d4be] text-[#5c4030] hidden sm:block">
                 {user.role}

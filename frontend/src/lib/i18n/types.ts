@@ -159,5 +159,8 @@ export interface Translations {
     hasAccount: string;
     loginError: string;
     registerError: string;
+    accountTitle: string;
+    passwordHint: string;
+    accountSaved: string;
   };
 }

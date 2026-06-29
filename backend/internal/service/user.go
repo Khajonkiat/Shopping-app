@@ -134,6 +134,25 @@ func (s *UserService) DeleteUser(id uint) error {
 	return s.db.Delete(&model.User{}, id).Error
 }
 
+func (s *UserService) UpdateSelf(id uint, username, password string) (*model.User, error) {
+	var user model.User
+	if err := s.db.First(&user, id).Error; err != nil {
+		return nil, err
+	}
+	updates := map[string]any{"username": username}
+	if password != "" {
+		hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			return nil, err
+		}
+		updates["password_hash"] = string(hash)
+	}
+	if err := s.db.Model(&user).Updates(updates).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 // EnsureMaster creates the master account if one does not yet exist.
 // If the given email already exists as a non-master account it is promoted.
 // Safe to call on every startup (idempotent).

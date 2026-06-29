@@ -8,6 +8,7 @@ import { useRequireAuth } from "@/lib/use-require-auth";
 import { Toast } from "@/components/toast";
 import { Spinner } from "@/components/spinner";
 import { useToast } from "@/lib/use-toast";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 const emptyForm = { name: "", base_url: "" };
 
@@ -22,6 +23,7 @@ export default function StoresPage() {
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState(emptyForm);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!ready) return;
@@ -61,10 +63,10 @@ export default function StoresPage() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm(t.stores.confirmDelete)) return;
     await api.stores.delete(id);
     setStores((prev) => prev.filter((s) => s.id !== id));
     if (editingId === id) cancelEdit();
+    setPendingDeleteId(null);
     toast(t.common.toastDeleted);
   }
 
@@ -171,7 +173,7 @@ export default function StoresPage() {
                     >
                       {editingId === s.id ? t.common.cancel : t.common.edit}
                     </button>
-                    <button onClick={() => handleDelete(s.id)} className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors">
+                    <button onClick={() => setPendingDeleteId(s.id)} className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors">
                       {t.common.delete}
                     </button>
                   </div>
@@ -182,6 +184,15 @@ export default function StoresPage() {
         </table>
       </div>
 
+      {pendingDeleteId !== null && (
+        <ConfirmDialog
+          message={t.stores.confirmDelete}
+          confirmLabel={t.common.delete}
+          cancelLabel={t.common.cancel}
+          onConfirm={() => handleDelete(pendingDeleteId)}
+          onCancel={() => setPendingDeleteId(null)}
+        />
+      )}
       {toastMsg && <Toast message={toastMsg} onDismiss={dismiss} />}
     </div>
   );
