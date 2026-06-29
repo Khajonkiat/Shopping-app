@@ -242,7 +242,7 @@ export default function PurchasesPage() {
               </p>
             )}
 
-            <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
+            <div className="flex justify-end gap-3 pt-1 border-t border-[#e8dfd5]">
               <button
                 type="button"
                 className={btnSecondary}
@@ -338,7 +338,7 @@ export default function PurchasesPage() {
               </p>
             )}
 
-            <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
+            <div className="flex justify-end gap-3 pt-1 border-t border-[#e8dfd5]">
               <button type="button" className={btnSecondary} onClick={cancelEdit}>{t.common.cancel}</button>
               <button
                 type="submit"
@@ -355,7 +355,7 @@ export default function PurchasesPage() {
       <div className={`${card} overflow-hidden`}>
         <table className="w-full">
           <thead>
-            <tr className="border-b border-[#f0e9e0] bg-[#faf5ef]">
+            <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
               <th className={th}>{t.common.product}</th>
               <th className={th}>{t.common.store}</th>
               <th className={th}>{t.common.price}</th>
@@ -374,7 +374,7 @@ export default function PurchasesPage() {
                 </td>
               </tr>
             ) : purchases.map((p) => (
-              <tr key={String(p.id)} className={`border-b border-[#f0e9e0] last:border-0 transition-colors ${editingId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
+              <tr key={String(p.id)} className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${editingId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
                 <td className={`${td} font-medium text-[#1a1208]`}>{p.product?.name ?? `#${p.product_id}`}</td>
                 <td className={`${td} text-[#7a6858]`}>{p.store?.name ?? `#${p.store_id}`}</td>
                 <td className={`${td} text-[#4a3728]`}>฿{p.price.toFixed(2)}</td>

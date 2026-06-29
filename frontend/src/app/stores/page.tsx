@@ -104,7 +104,7 @@ export default function StoresPage() {
                   placeholder="https://…" />
               </div>
             </div>
-            <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
+            <div className="flex justify-end gap-3 pt-1 border-t border-[#e8dfd5]">
               <button type="button" className={btnSecondary} onClick={() => setShowForm(false)}>{t.common.cancel}</button>
               <button type="submit" className={btnPrimary}>{t.common.create}</button>
             </div>
@@ -130,7 +130,7 @@ export default function StoresPage() {
                   placeholder="https://…" />
               </div>
             </div>
-            <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
+            <div className="flex justify-end gap-3 pt-1 border-t border-[#e8dfd5]">
               <button type="button" className={btnSecondary} onClick={cancelEdit}>{t.common.cancel}</button>
               <button type="submit" className={btnPrimary}>{t.common.save}</button>
             </div>
@@ -141,7 +141,7 @@ export default function StoresPage() {
       <div className={`${card} overflow-hidden`}>
         <table className="w-full">
           <thead>
-            <tr className="border-b border-[#f0e9e0] bg-[#faf5ef]">
+            <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
               <th className={th}>{t.common.name}</th>
               <th className={th}>{t.common.baseUrl}</th>
               <th className={th} />
@@ -153,7 +153,7 @@ export default function StoresPage() {
                 <td colSpan={3} className="px-4 py-16 text-center text-[#a0907c] text-sm">{t.stores.noData}</td>
               </tr>
             ) : stores.map((s) => (
-              <tr key={String(s.id)} className={`border-b border-[#f0e9e0] last:border-0 transition-colors ${editingId === s.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
+              <tr key={String(s.id)} className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${editingId === s.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
                 <td className={`${td} font-medium text-[#1a1208]`}>{s.name}</td>
                 <td className={td}>
                   {s.base_url ? (

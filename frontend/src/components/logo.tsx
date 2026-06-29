@@ -11,7 +11,7 @@ export default function Logo() {
       {/* Price-tag body, pointing right */}
       <path
         d="M4 4 L15 4 L22 12 L15 20 L4 20 Q2 20 2 18 L2 6 Q2 4 4 4 Z"
-        fill="#6366f1"
+        fill="#b07040"
       />
       {/* String hole */}
       <circle cx="6" cy="12" r="1.5" fill="white" fillOpacity="0.85" />

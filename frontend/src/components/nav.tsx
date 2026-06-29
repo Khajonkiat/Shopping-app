@@ -75,7 +75,7 @@ export default function Nav({ collapsed }: NavProps) {
 
   return (
     <aside
-      className={`fixed top-14 left-0 bottom-0 bg-white border-r border-[#e8dfd5] z-20 overflow-y-auto overflow-x-hidden transition-all duration-200 ${
+      className={`fixed top-14 left-0 bottom-0 bg-[#ede5d5] border-r border-[#d9cfc3] z-20 overflow-y-auto overflow-x-hidden transition-all duration-200 ${
         collapsed ? "w-16" : "w-56"
       }`}
     >
@@ -91,8 +91,8 @@ export default function Nav({ collapsed }: NavProps) {
                 title={l.label}
                 className={`flex flex-col items-center gap-1 py-4 px-1 rounded-xl w-full mb-1 transition-colors ${
                   active
-                    ? "bg-[#f0e9e0] text-[#1a1208] font-medium"
-                    : "text-[#7a6858] hover:bg-[#f7f2ec] hover:text-[#1a1208]"
+                    ? "bg-[#e5d4be] text-[#1a1208] font-medium"
+                    : "text-[#7a6858] hover:bg-[#f5ede2] hover:text-[#1a1208]"
                 }`}
               >
                 {l.icon}
@@ -107,8 +107,8 @@ export default function Nav({ collapsed }: NavProps) {
               href={l.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-0.5 text-sm transition-colors ${
                 active
-                  ? "bg-[#f0e9e0] text-[#1a1208] font-medium"
-                  : "text-[#7a6858] hover:bg-[#f7f2ec] hover:text-[#1a1208]"
+                  ? "bg-[#e5d4be] text-[#1a1208] font-medium"
+                  : "text-[#7a6858] hover:bg-[#f5ede2] hover:text-[#1a1208]"
               }`}
             >
               {l.icon}

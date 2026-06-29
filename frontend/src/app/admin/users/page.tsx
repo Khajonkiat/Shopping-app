@@ -9,8 +9,8 @@ import type { AdminUser } from "@/lib/types";
 
 const roleBadge = (role: string) =>
   role === "master"
-    ? "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#f0e9e0] text-[#b07040]"
-    : "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#f5f3f0] text-[#7a6858]";
+    ? "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#e5d4be] text-[#7a4a1e]"
+    : "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#f0ece8] text-[#6b5244]";
 
 const emptyEdit = { username: "", email: "", role: "user", password: "" };
 
@@ -89,7 +89,7 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-[#1a1208]">{t.admin.title}</h1>
-        <p className="text-sm text-[#9c8c7c] mt-1">
+        <p className="text-sm text-[#a0907c] mt-1">
           {users.length} {users.length === 1 ? "account" : "accounts"}
         </p>
       </div>
@@ -100,7 +100,7 @@ export default function AdminUsersPage() {
 
       {/* Edit panel */}
       {editingId !== null && (
-        <div className={`${card} p-6 border-[#d4b896] ring-1 ring-[#d4b896]/40`}>
+        <div className={`${card} p-6 border-[#c47830] ring-1 ring-[#c47830]/30`}>
           <h2 className="text-sm font-semibold text-[#4a3728] mb-4">{t.admin.editTitle}</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -171,7 +171,7 @@ export default function AdminUsersPage() {
         <div className={`${card} overflow-hidden`}>
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#e8dfd5] bg-[#faf5ef]">
+              <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
                 <th className={th}>{t.admin.col.username}</th>
                 <th className={th}>{t.admin.col.email}</th>
                 <th className={th}>{t.admin.col.role}</th>
@@ -187,7 +187,7 @@ export default function AdminUsersPage() {
                 return (
                   <tr
                     key={u.id}
-                    className={`border-b border-[#f0e9e0] last:border-0 transition-colors ${
+                    className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${
                       isEditing ? "bg-[#fdf5ec]" : "hover:bg-[#fdf9f5]"
                     }`}
                   >
@@ -210,14 +210,14 @@ export default function AdminUsersPage() {
                         {isEditing ? (
                           <button
                             onClick={cancelEdit}
-                            className="text-xs font-medium px-3 py-1.5 rounded-lg border border-[#d4b896] text-[#b07040] bg-[#fdf5ec] hover:bg-[#f0e9e0] transition-colors"
+                            className="text-xs font-medium px-3 py-1.5 rounded-lg border border-[#c47830] text-[#b07040] bg-[#f5e8d4] hover:bg-[#eddcbe] transition-colors"
                           >
                             {t.common.cancel}
                           </button>
                         ) : (
                           <button
                             onClick={() => startEdit(u)}
-                            className="text-xs font-medium px-3 py-1.5 rounded-lg border border-[#e8dfd5] text-[#4a3728] hover:bg-[#f0e9e0] hover:border-[#d4b896] transition-colors"
+                            className="text-xs font-medium px-3 py-1.5 rounded-lg border border-[#d9cfc3] text-[#4a3728] hover:bg-[#e5d4be] hover:border-[#b8a898] transition-colors"
                           >
                             {t.common.edit}
                           </button>

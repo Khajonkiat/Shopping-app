@@ -21,7 +21,7 @@ export default function TopBar({ onToggle }: TopBarProps) {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-[#e8dfd5] flex items-center px-4 gap-2 z-30">
+    <header className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-[#d9cfc3] flex items-center px-4 gap-2 z-30">
       {/* Hamburger + Logo */}
       <div className="flex items-center gap-1 shrink-0">
         <button
@@ -48,15 +48,15 @@ export default function TopBar({ onToggle }: TopBarProps) {
         <LangSwitcher />
         {isLoggedIn ? (
           <>
-            <span className="text-[#9c8c7c] text-sm hidden md:block">{user?.username}</span>
+            <span className="text-[#a0907c] text-sm hidden md:block">{user?.username}</span>
             {user?.role === "master" && (
-              <span className="text-xs font-medium px-2 py-0.5 rounded bg-[#f0e9e0] text-[#7a6858] hidden sm:block">
+              <span className="text-xs font-medium px-2 py-0.5 rounded bg-[#e5d4be] text-[#5c4030] hidden sm:block">
                 {user.role}
               </span>
             )}
             <button
               onClick={handleLogout}
-              className="text-sm text-[#9c8c7c] hover:text-[#1a1208] transition-colors"
+              className="text-sm text-[#a0907c] hover:text-[#1a1208] transition-colors"
             >
               {t.auth.logout}
             </button>

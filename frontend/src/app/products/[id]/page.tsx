@@ -278,7 +278,7 @@ export default function ProductDetailPage() {
   if (!ready || !product) {
     return (
       <div className="flex items-center justify-center h-48">
-        <div className="w-5 h-5 rounded-full border-2 border-[#e8dfd5] border-t-[#b07040] animate-spin" />
+        <div className="w-5 h-5 rounded-full border-2 border-[#d9cfc3] border-t-[#b07040] animate-spin" />
       </div>
     );
   }
@@ -300,12 +300,12 @@ export default function ProductDetailPage() {
         {(product.category || product.unit || product.description) && (
           <div className="flex flex-wrap items-center gap-2 mt-2">
             {product.category && (
-              <span className="text-xs font-medium bg-[#f0e9e0] text-[#4a3728] px-2.5 py-1 rounded-full">
+              <span className="text-xs font-medium bg-[#e5d4be] text-[#4a3728] px-2.5 py-1 rounded-full">
                 {product.category}
               </span>
             )}
             {product.unit && (
-              <span className="text-xs font-medium bg-[#f0e9e0] text-[#4a3728] px-2.5 py-1 rounded-full">
+              <span className="text-xs font-medium bg-[#e5d4be] text-[#4a3728] px-2.5 py-1 rounded-full">
                 {product.unit}
               </span>
             )}
@@ -341,7 +341,7 @@ export default function ProductDetailPage() {
       )}
 
       {/* Tabs */}
-      <div className="border-b border-[#e8dfd5] flex gap-1">
+      <div className="border-b border-[#d9cfc3] flex gap-1">
         {tabs.map(({ key, label, count }) => (
           <button
             key={key}
@@ -352,7 +352,7 @@ export default function ProductDetailPage() {
           >
             {label}
             <span className={`ml-1.5 text-xs font-semibold px-1.5 py-0.5 rounded-full ${
-              tab === key ? "bg-[#f0e9e0] text-[#b07040]" : "bg-[#f0e9e0] text-[#a0907c]"
+              tab === key ? "bg-[#e5d4be] text-[#b07040]" : "bg-[#f0ece8] text-[#a0907c]"
             }`}>
               {count}
             </span>
@@ -419,7 +419,7 @@ export default function ProductDetailPage() {
                   </p>
                 )}
 
-                <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
+                <div className="flex justify-end gap-3 pt-1 border-t border-[#e8dfd5]">
                   <button
                     type="button"
                     className={btnSecondary}
@@ -483,7 +483,7 @@ export default function ProductDetailPage() {
                   </p>
                 )}
 
-                <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
+                <div className="flex justify-end gap-3 pt-1 border-t border-[#e8dfd5]">
                   <button type="button" className={btnSecondary} onClick={cancelEditPrice}>{t.common.cancel}</button>
                   <button
                     type="submit"
@@ -500,7 +500,7 @@ export default function ProductDetailPage() {
           <div className={`${card} overflow-hidden`}>
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#f0e9e0] bg-[#faf5ef]">
+                <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
                   <th className={th}>{t.common.store}</th>
                   <th className={th}>{t.common.price}</th>
                   <th className={th}>{t.common.date}</th>
@@ -516,7 +516,7 @@ export default function ProductDetailPage() {
                     </td>
                   </tr>
                 ) : prices.map((p) => (
-                  <tr key={String(p.id)} className={`border-b border-[#f0e9e0] last:border-0 transition-colors ${editingPriceId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
+                  <tr key={String(p.id)} className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${editingPriceId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
                     <td className={`${td} font-medium text-[#1a1208]`}>{p.store?.name ?? `#${p.store_id}`}</td>
                     <td className={`${td} font-semibold text-[#1a1208]`}>฿{p.price.toFixed(2)}</td>
                     <td className={`${td} text-[#a0907c]`}>{new Date(p.recorded_at).toLocaleDateString()}</td>
@@ -524,7 +524,7 @@ export default function ProductDetailPage() {
                       <span className={`inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full ${
                         p.source_type === "scraped"
                           ? "bg-[#e8f0e4] text-[#4a6a38]"
-                          : "bg-[#f0e9e0] text-[#4a3728]"
+                          : "bg-[#e5d4be] text-[#4a3728]"
                       }`}>
                         {p.source_type === "scraped" ? t.productDetail.sourceScraped : t.productDetail.sourceManual}
                       </span>
@@ -628,7 +628,7 @@ export default function ProductDetailPage() {
                   </p>
                 )}
 
-                <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
+                <div className="flex justify-end gap-3 pt-1 border-t border-[#e8dfd5]">
                   <button
                     type="button"
                     className={btnSecondary}
@@ -711,7 +711,7 @@ export default function ProductDetailPage() {
                   </p>
                 )}
 
-                <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
+                <div className="flex justify-end gap-3 pt-1 border-t border-[#e8dfd5]">
                   <button type="button" className={btnSecondary} onClick={cancelEditPurchase}>{t.common.cancel}</button>
                   <button
                     type="submit"
@@ -728,7 +728,7 @@ export default function ProductDetailPage() {
           <div className={`${card} overflow-hidden`}>
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#f0e9e0] bg-[#faf5ef]">
+                <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
                   <th className={th}>{t.common.store}</th>
                   <th className={th}>{t.common.price}</th>
                   <th className={th}>{t.common.qty}</th>
@@ -746,7 +746,7 @@ export default function ProductDetailPage() {
                     </td>
                   </tr>
                 ) : purchases.map((p) => (
-                  <tr key={String(p.id)} className={`border-b border-[#f0e9e0] last:border-0 transition-colors ${editingPurchaseId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
+                  <tr key={String(p.id)} className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${editingPurchaseId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
                     <td className={`${td} font-medium text-[#1a1208]`}>{p.store?.name ?? `#${p.store_id}`}</td>
                     <td className={`${td} text-[#4a3728]`}>฿{p.price.toFixed(2)}</td>
                     <td className={`${td} text-[#4a3728]`}>{p.quantity}</td>
@@ -808,7 +808,7 @@ export default function ProductDetailPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {images.map((img) => (
                 <div key={img.id} className="group relative">
-                  <div className="aspect-square overflow-hidden rounded-xl border border-[#e8dfd5] bg-[#fdf9f5]">
+                  <div className="aspect-square overflow-hidden rounded-xl border border-[#d9cfc3] bg-[#fdf9f5]">
                     <img
                       src={imageUrl(img.filename)}
                       alt=""
