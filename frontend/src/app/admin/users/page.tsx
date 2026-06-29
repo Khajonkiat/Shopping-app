@@ -102,7 +102,7 @@ export default function AdminUsersPage() {
       {editingId !== null && (
         <div className={`${card} p-6 border-[#c47830] ring-1 ring-[#c47830]/30`}>
           <h2 className="text-sm font-semibold text-[#4a3728] mb-4">{t.admin.editTitle}</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>{t.admin.col.username}</label>
               <input
@@ -168,7 +168,7 @@ export default function AdminUsersPage() {
           <p className="text-[#a0907c] text-sm">{t.admin.noData}</p>
         </div>
       ) : (
-        <div className={`${card} overflow-hidden`}>
+        <div className={`${card} overflow-x-auto`}>
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">

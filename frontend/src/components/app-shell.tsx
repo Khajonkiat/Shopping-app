@@ -7,16 +7,32 @@ import Nav from "./nav";
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { isLoggedIn } = useAuth();
 
-  const sidebarWidth = isLoggedIn ? (collapsed ? "ml-16" : "ml-56") : "";
+  function handleToggle() {
+    if (typeof window !== "undefined" && window.innerWidth < 640) {
+      setMobileOpen((o) => !o);
+    } else {
+      setCollapsed((c) => !c);
+    }
+  }
+
+  // Mobile: no margin (sidebar is overlay). sm+: ml-56 or ml-16 based on collapsed.
+  const sidebarWidth = isLoggedIn ? (collapsed ? "sm:ml-16" : "sm:ml-56") : "";
 
   return (
     <>
-      <TopBar onToggle={() => setCollapsed((c) => !c)} />
+      <TopBar onToggle={handleToggle} />
+      {isLoggedIn && mobileOpen && (
+        <div
+          className="fixed inset-0 z-10 bg-black/30 sm:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
       <div className="flex mt-14">
-        <Nav collapsed={collapsed} />
-        <main className={`flex-1 min-w-0 px-6 py-6 transition-all duration-200 ${sidebarWidth}`}>
+        <Nav collapsed={collapsed} mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
+        <main className={`flex-1 min-w-0 px-4 sm:px-6 py-6 transition-all duration-200 ${sidebarWidth}`}>
           <div className="max-w-5xl mx-auto w-full">{children}</div>
         </main>
       </div>

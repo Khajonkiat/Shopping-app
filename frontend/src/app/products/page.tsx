@@ -153,7 +153,7 @@ export default function ProductsPage() {
         <div className={`${card} p-6`}>
           <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.products.formNew}</h3>
           <form onSubmit={handleCreate} className="space-y-5">
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label className={labelCls}>{t.common.name} <span className="text-rose-400">*</span></label>
                 <input className={inputCls} required value={form.name} onChange={set("name")} />
@@ -209,7 +209,7 @@ export default function ProductsPage() {
         <div className={`${editCard} p-6`}>
           <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.products.formEdit}</h3>
           <form onSubmit={handleUpdate} className="space-y-5">
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label className={labelCls}>{t.common.name} <span className="text-rose-400">*</span></label>
                 <input className={inputCls} required value={editForm.name} onChange={setEdit("name")} />
