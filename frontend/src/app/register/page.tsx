@@ -46,44 +46,44 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm">
         <h1 className="text-xl font-semibold text-center text-[#1a1208] mb-7">{t.auth.registerTitle}</h1>
 
-        <form onSubmit={handleSubmit} className="bg-white border border-[#e8dfd5] rounded-2xl p-7 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="bg-white border border-[#d9cfc3] rounded-2xl p-7 flex flex-col gap-4">
           {error && (
             <p className="text-sm text-rose-700 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">{error}</p>
           )}
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-[#a0907c] uppercase tracking-wide">{t.auth.email}</label>
+            <label className="text-xs font-semibold text-[#5c4433] uppercase tracking-wide">{t.auth.email}</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="border border-[#e8dfd5] rounded-lg px-3 py-2.5 text-sm text-[#1a1208] placeholder:text-[#c4b5a5] focus:outline-none focus:border-[#b07040] transition-colors"
+              className="border border-[#d9cfc3] rounded-lg px-3 py-2.5 text-sm text-[#1a1208] placeholder:text-[#c4b5a5] focus:outline-none focus:border-[#b07040] transition-colors"
               autoComplete="email"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-[#a0907c] uppercase tracking-wide">{t.auth.username}</label>
+            <label className="text-xs font-semibold text-[#5c4433] uppercase tracking-wide">{t.auth.username}</label>
             <input
               type="text"
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="border border-[#e8dfd5] rounded-lg px-3 py-2.5 text-sm text-[#1a1208] placeholder:text-[#c4b5a5] focus:outline-none focus:border-[#b07040] transition-colors"
+              className="border border-[#d9cfc3] rounded-lg px-3 py-2.5 text-sm text-[#1a1208] placeholder:text-[#c4b5a5] focus:outline-none focus:border-[#b07040] transition-colors"
               autoComplete="username"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-[#a0907c] uppercase tracking-wide">{t.auth.password}</label>
+            <label className="text-xs font-semibold text-[#5c4433] uppercase tracking-wide">{t.auth.password}</label>
             <input
               type="password"
               required
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="border border-[#e8dfd5] rounded-lg px-3 py-2.5 text-sm text-[#1a1208] placeholder:text-[#c4b5a5] focus:outline-none focus:border-[#b07040] transition-colors"
+              className="border border-[#d9cfc3] rounded-lg px-3 py-2.5 text-sm text-[#1a1208] placeholder:text-[#c4b5a5] focus:outline-none focus:border-[#b07040] transition-colors"
               autoComplete="new-password"
             />
           </div>
@@ -97,7 +97,7 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-[#9c8c7c] mt-5">
+        <p className="text-center text-sm text-[#a0907c] mt-5">
           {t.auth.hasAccount}{" "}
           <Link href="/login" className="text-[#4a3728] hover:text-[#1a1208] font-medium transition-colors">
             {t.auth.login}

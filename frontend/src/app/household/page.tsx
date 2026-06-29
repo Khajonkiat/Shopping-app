@@ -69,26 +69,26 @@ export default function HouseholdPage() {
       {household && (
         <div className={`${card} p-6 space-y-4`}>
           <div>
-            <p className="text-xs font-semibold text-[#a0907c] uppercase tracking-wider mb-1">
+            <p className="text-xs font-semibold text-[#5c4433] uppercase tracking-wider mb-1">
               {t.household.title}
             </p>
             <p className="text-lg font-semibold text-[#1a1208]">{household.name}</p>
           </div>
 
           <div>
-            <p className="text-xs font-semibold text-[#a0907c] uppercase tracking-wider mb-2">
+            <p className="text-xs font-semibold text-[#5c4433] uppercase tracking-wider mb-2">
               {t.household.members}
             </p>
             <ul className="space-y-2">
               {household.members?.map((m) => (
                 <li key={m.id} className="flex items-center gap-3">
-                  <span className="w-7 h-7 rounded-full bg-[#f0e9e0] text-[#8f5a32] text-xs font-bold flex items-center justify-center uppercase">
+                  <span className="w-7 h-7 rounded-full bg-[#e5d4be] text-[#7a4a1e] text-xs font-bold flex items-center justify-center uppercase">
                     {m.username[0]}
                   </span>
                   <span className="text-sm text-[#2a1c10] font-medium">{m.username}</span>
                   <span className="text-xs text-[#a0907c]">{m.email}</span>
                   {m.id === household.admin_id && (
-                    <span className="ml-auto text-xs bg-[#f0e9e0] text-[#b07040] font-semibold px-2 py-0.5 rounded-full">
+                    <span className="ml-auto text-xs bg-[#e5d4be] text-[#7a4a1e] font-semibold px-2 py-0.5 rounded-full">
                       admin
                     </span>
                   )}
@@ -98,7 +98,7 @@ export default function HouseholdPage() {
           </div>
 
           {isAdmin && (
-            <div className="pt-2 border-t border-[#f0e9e0] space-y-3">
+            <div className="pt-2 border-t border-[#e8dfd5] space-y-3">
               <button
                 onClick={handleGenerateInvite}
                 className="bg-[#b07040] hover:bg-[#8f5a32] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
@@ -108,12 +108,12 @@ export default function HouseholdPage() {
 
               {inviteCode && (
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-[#fdf9f5] border border-[#e8dfd5] rounded-lg px-3 py-2 text-xs font-mono text-[#4a3728] break-all">
+                  <div className="flex-1 bg-[#fdf9f5] border border-[#d9cfc3] rounded-lg px-3 py-2 text-xs font-mono text-[#4a3728] break-all">
                     {inviteCode}
                   </div>
                   <button
                     onClick={handleCopy}
-                    className="shrink-0 text-xs text-[#b07040] hover:text-[#8f5a32] font-semibold px-3 py-2 border border-[#d4b896] rounded-lg hover:bg-[#f7f0e8] transition-colors"
+                    className="shrink-0 text-xs text-[#b07040] hover:text-[#8f5a32] font-semibold px-3 py-2 border border-[#c47830] rounded-lg hover:bg-[#f0e3d0] transition-colors"
                   >
                     {copied ? t.household.inviteCopied : t.common.copy}
                   </button>
@@ -141,7 +141,7 @@ export default function HouseholdPage() {
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value)}
               placeholder={t.household.joinPlaceholder}
-              className="flex-1 border border-[#e8dfd5] rounded-lg px-3 py-2 text-sm text-[#1a1208] focus:outline-none focus:border-[#b07040] transition-colors"
+              className="flex-1 border border-[#d9cfc3] rounded-lg px-3 py-2 text-sm text-[#1a1208] focus:outline-none focus:border-[#b07040] transition-colors"
             />
             <button
               type="submit"

@@ -174,7 +174,7 @@ export default function ProductsPage() {
                 <label className={labelCls}>{t.productDetail.uploadImage}</label>
                 <div className="flex items-center gap-4 mt-1">
                   {createImagePreview && (
-                    <img src={createImagePreview} alt="" className="w-14 h-14 rounded-lg object-cover border border-[#e8dfd5] shrink-0" />
+                    <img src={createImagePreview} alt="" className="w-14 h-14 rounded-lg object-cover border border-[#d9cfc3] shrink-0" />
                   )}
                   <label className={`${btnSecondary} cursor-pointer shrink-0`}>
                     {pendingCreateImage ? pendingCreateImage.name : t.productDetail.uploadImage}
@@ -197,7 +197,7 @@ export default function ProductsPage() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
+            <div className="flex justify-end gap-3 pt-1 border-t border-[#e8dfd5]">
               <button type="button" className={btnSecondary} onClick={() => setShowForm(false)}>{t.common.cancel}</button>
               <button type="submit" className={btnPrimary}>{t.common.create}</button>
             </div>
@@ -233,7 +233,7 @@ export default function ProductsPage() {
                     <div className="flex flex-wrap gap-2">
                       {(products.find((p) => p.id === editingId)?.images ?? []).map((img: ProductImage) => (
                         <div key={img.id} className="relative group">
-                          <img src={imageUrl(img.filename)} alt="" className="w-14 h-14 rounded-lg object-cover border border-[#e8dfd5]" />
+                          <img src={imageUrl(img.filename)} alt="" className="w-14 h-14 rounded-lg object-cover border border-[#d9cfc3]" />
                           <button
                             type="button"
                             onClick={() => handleEditImageDelete(img.id)}
@@ -261,7 +261,7 @@ export default function ProductsPage() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-end gap-3 pt-1 border-t border-[#f0e9e0]">
+            <div className="flex justify-end gap-3 pt-1 border-t border-[#e8dfd5]">
               <button type="button" className={btnSecondary} onClick={cancelEdit}>{t.common.cancel}</button>
               <button type="submit" className={btnPrimary}>{t.common.save}</button>
             </div>
@@ -272,7 +272,7 @@ export default function ProductsPage() {
       <div className={`${card} overflow-hidden`}>
         <table className="w-full">
           <thead>
-            <tr className="border-b border-[#f0e9e0] bg-[#faf5ef]">
+            <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
               <th className={th} />
               <th className={th}>{t.common.name}</th>
               <th className={th}>{t.common.category}</th>
@@ -290,17 +290,17 @@ export default function ProductsPage() {
             ) : products.map((p) => {
               const thumb = p.images?.[0];
               return (
-              <tr key={String(p.id)} className={`border-b border-[#f0e9e0] last:border-0 transition-colors ${editingId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
+              <tr key={String(p.id)} className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${editingId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
                 <td className="px-3 py-2 w-12">
                   <Link href={`/products/${p.id}`}>
                     {thumb ? (
                       <img
                         src={imageUrl(thumb.filename)}
                         alt=""
-                        className="w-10 h-10 rounded-lg object-cover border border-[#e8dfd5]"
+                        className="w-10 h-10 rounded-lg object-cover border border-[#d9cfc3]"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-lg bg-[#f0e9e0] border border-[#e8dfd5] flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-lg bg-[#eddccc] border border-[#d9cfc3] flex items-center justify-center">
                         <svg className="w-4 h-4 text-[#c4b5a5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 3h18M3 21h18" />
                         </svg>

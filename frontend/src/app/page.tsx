@@ -71,7 +71,7 @@ export default function Dashboard() {
     <div className="space-y-10">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-[#1a1208]">{t.dashboard.title}</h1>
-        <p className="text-sm text-[#9c8c7c] mt-1">Personal price tracker</p>
+        <p className="text-sm text-[#a0907c] mt-1">Personal price tracker</p>
       </div>
 
       <div className="grid grid-cols-3 gap-5">
@@ -105,7 +105,7 @@ export default function Dashboard() {
             <select
               value={selectedMonthKey}
               onChange={(e) => setSelectedMonthKey(e.target.value)}
-              className="text-xs border border-[#e8dfd5] rounded-lg px-3 py-1.5 text-[#4a3728] bg-white focus:outline-none focus:border-[#b07040] transition-colors cursor-pointer"
+              className="text-xs border border-[#d9cfc3] rounded-lg px-3 py-1.5 text-[#4a3728] bg-white focus:outline-none focus:border-[#b07040] transition-colors cursor-pointer"
             >
               {availableMonths.map((key) => (
                 <option key={key} value={key}>{monthLabel(key, locale)}</option>
@@ -141,7 +141,7 @@ export default function Dashboard() {
               <div className={`${card} overflow-hidden`}>
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-[#e8dfd5] bg-[#faf5ef]">
+                    <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
                       <th className={th}>{t.dashboard.col.date}</th>
                       <th className={th}>{t.dashboard.col.total}</th>
                       <th className={th}>{t.nav.purchases}</th>
@@ -152,7 +152,7 @@ export default function Dashboard() {
                       <tr
                         key={key}
                         onClick={() => setSelectedMonthKey(key)}
-                        className={`border-b border-[#f0e9e0] last:border-0 transition-colors cursor-pointer ${key === selectedMonthKey ? "bg-[#fdf5ee]" : "hover:bg-[#fdf9f5]"}`}
+                        className={`border-b border-[#e8dfd5] last:border-0 transition-colors cursor-pointer ${key === selectedMonthKey ? "bg-[#f5e8d4]" : "hover:bg-[#fdf9f5]"}`}
                       >
                         <td className={`${td} font-medium text-[#1a1208]`}>{monthLabel(key, locale)}</td>
                         <td className={`${td} font-semibold text-[#1a1208]`}>
@@ -192,7 +192,7 @@ export default function Dashboard() {
           <div className={`${card} overflow-hidden`}>
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#e8dfd5] bg-[#faf5ef]">
+                <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
                   <th className={th}>{t.dashboard.col.product}</th>
                   <th className={th}>{t.dashboard.col.store}</th>
                   <th className={th}>{t.dashboard.col.price}</th>
@@ -203,7 +203,7 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {recent.map((p) => (
-                  <tr key={String(p.id)} className="border-b border-[#f0e9e0] last:border-0 hover:bg-[#fdf9f5] transition-colors">
+                  <tr key={String(p.id)} className="border-b border-[#e8dfd5] last:border-0 hover:bg-[#fdf9f5] transition-colors">
                     <td className={`${td} font-medium text-[#1a1208]`}>{p.product?.name ?? `#${p.product_id}`}</td>
                     <td className={`${td} text-[#7a6858]`}>{p.store?.name ?? `#${p.store_id}`}</td>
                     <td className={`${td} text-[#4a3728]`}>฿{p.price.toFixed(2)}</td>
