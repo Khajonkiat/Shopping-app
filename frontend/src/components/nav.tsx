@@ -75,7 +75,7 @@ export default function Nav({ collapsed }: NavProps) {
 
   return (
     <aside
-      className={`fixed top-14 left-0 bottom-0 bg-[#ede5d5] border-r border-[#d9cfc3] z-20 overflow-y-auto overflow-x-hidden transition-all duration-200 ${
+      className={`fixed top-14 left-0 bottom-0 bg-white border-r border-[#d9cfc3] z-20 overflow-y-auto overflow-x-hidden transition-all duration-200 ${
         collapsed ? "w-16" : "w-56"
       }`}
     >
