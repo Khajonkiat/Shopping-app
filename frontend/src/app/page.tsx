@@ -74,7 +74,7 @@ export default function Dashboard() {
         <p className="text-sm text-[#a0907c] mt-1">Personal price tracker</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <StatCard
           label={t.nav.products}
           value={products.length}
@@ -113,7 +113,7 @@ export default function Dashboard() {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-5 mb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
             <div className={`${card} p-6`}>
               <div className="text-xs font-medium text-[#a0907c] uppercase tracking-wide mb-3">{monthLabel(selectedMonthKey, locale)}</div>
               <div className="text-3xl font-bold tracking-tight text-[#1a1208]">
@@ -138,7 +138,7 @@ export default function Dashboard() {
           {monthlyRows.length > 0 && (
             <>
               <h3 className={`${sectionHeading} mb-3`}>{t.dashboard.monthBreakdown}</h3>
-              <div className={`${card} overflow-hidden`}>
+              <div className={`${card} overflow-x-auto`}>
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
@@ -189,7 +189,7 @@ export default function Dashboard() {
             </Link>
           </div>
         ) : (
-          <div className={`${card} overflow-hidden`}>
+          <div className={`${card} overflow-x-auto`}>
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">

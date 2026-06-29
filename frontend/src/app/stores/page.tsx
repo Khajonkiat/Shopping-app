@@ -90,7 +90,7 @@ export default function StoresPage() {
         <div className={`${card} p-6`}>
           <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.stores.formNew}</h3>
           <form onSubmit={handleCreate} className="space-y-5">
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label className={labelCls}>{t.common.name} <span className="text-rose-400">*</span></label>
                 <input required className={inputCls} value={form.name}
@@ -116,7 +116,7 @@ export default function StoresPage() {
         <div className={`${editCard} p-6`}>
           <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.stores.formEdit}</h3>
           <form onSubmit={handleUpdate} className="space-y-5">
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label className={labelCls}>{t.common.name} <span className="text-rose-400">*</span></label>
                 <input required className={inputCls} value={editForm.name}

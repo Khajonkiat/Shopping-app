@@ -6,6 +6,8 @@ import { useAuth } from "@/lib/auth";
 
 interface NavProps {
   collapsed: boolean;
+  mobileOpen: boolean;
+  onMobileClose: () => void;
 }
 
 function IconHome() {
@@ -57,7 +59,7 @@ function IconUsers() {
   );
 }
 
-export default function Nav({ collapsed }: NavProps) {
+export default function Nav({ collapsed, mobileOpen, onMobileClose }: NavProps) {
   const pathname = usePathname();
   const { t } = useLocale();
   const { isLoggedIn, isMaster } = useAuth();
@@ -75,44 +77,37 @@ export default function Nav({ collapsed }: NavProps) {
 
   return (
     <aside
-      className={`fixed top-14 left-0 bottom-0 bg-white border-r border-[#d9cfc3] z-20 overflow-y-auto overflow-x-hidden transition-all duration-200 ${
-        collapsed ? "w-16" : "w-56"
-      }`}
+      className={`fixed top-14 left-0 bottom-0 bg-white border-r border-[#d9cfc3] z-20 overflow-y-auto overflow-x-hidden transition-all duration-200 w-56 ${
+        collapsed ? "sm:w-16" : "sm:w-56"
+      } ${mobileOpen ? "translate-x-0" : "-translate-x-full"} sm:translate-x-0`}
     >
-      <nav className={`py-3 ${collapsed ? "px-1" : "px-2"}`}>
+      <nav className={`py-3 px-2 ${collapsed ? "sm:px-1" : ""}`}>
         {links.map((l) => {
           const active = l.exact ? pathname === l.href : pathname.startsWith(l.href);
-
-          if (collapsed) {
-            return (
-              <Link
-                key={l.href}
-                href={l.href}
-                title={l.label}
-                className={`flex flex-col items-center gap-1 py-4 px-1 rounded-xl w-full mb-1 transition-colors ${
-                  active
-                    ? "bg-[#e5d4be] text-[#1a1208] font-medium"
-                    : "text-[#7a6858] hover:bg-[#f5ede2] hover:text-[#1a1208]"
-                }`}
-              >
-                {l.icon}
-                <span className="text-[10px] leading-tight text-center">{l.label}</span>
-              </Link>
-            );
-          }
+          const activeStyle = active
+            ? "bg-[#e5d4be] text-[#1a1208] font-medium"
+            : "text-[#7a6858] hover:bg-[#f5ede2] hover:text-[#1a1208]";
 
           return (
             <Link
               key={l.href}
               href={l.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl w-full mb-0.5 text-sm transition-colors ${
-                active
-                  ? "bg-[#e5d4be] text-[#1a1208] font-medium"
-                  : "text-[#7a6858] hover:bg-[#f5ede2] hover:text-[#1a1208]"
-              }`}
+              title={l.label}
+              onClick={onMobileClose}
+              className={`block w-full mb-1 rounded-xl transition-colors ${activeStyle}`}
             >
-              {l.icon}
-              <span>{l.label}</span>
+              {/* Mini mode: desktop only when collapsed */}
+              {collapsed && (
+                <span className="hidden sm:flex flex-col items-center gap-1 py-4 px-1">
+                  {l.icon}
+                  <span className="text-[10px] leading-tight text-center">{l.label}</span>
+                </span>
+              )}
+              {/* Expanded mode: always on mobile, on desktop when not collapsed */}
+              <span className={`flex items-center gap-3 px-3 py-2.5 text-sm ${collapsed ? "sm:hidden" : ""}`}>
+                {l.icon}
+                <span>{l.label}</span>
+              </span>
             </Link>
           );
         })}

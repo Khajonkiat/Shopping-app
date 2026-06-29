@@ -170,7 +170,7 @@ export default function PurchasesPage() {
         <div className={`${card} p-6`}>
           <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.purchases.formRecord}</h3>
           <form onSubmit={handleCreate} noValidate className="space-y-5">
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div>
                 <label className={labelCls}>{t.common.product} <span className="text-rose-400">*</span></label>
                 <select
@@ -266,7 +266,7 @@ export default function PurchasesPage() {
         <div className={`${editCard} p-6`}>
           <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.purchases.formEdit}</h3>
           <form onSubmit={handleUpdate} noValidate className="space-y-5">
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div>
                 <label className={labelCls}>{t.common.product} <span className="text-rose-400">*</span></label>
                 <select
@@ -352,7 +352,7 @@ export default function PurchasesPage() {
         </div>
       )}
 
-      <div className={`${card} overflow-hidden`}>
+      <div className={`${card} overflow-x-auto`}>
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">

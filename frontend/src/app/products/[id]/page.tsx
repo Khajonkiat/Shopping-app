@@ -379,7 +379,7 @@ export default function ProductDetailPage() {
             <div className={`${card} p-6`}>
               <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.productDetail.formRecordPrice}</h3>
               <form onSubmit={handleAddPrice} noValidate className="space-y-5">
-                <div className="grid grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                   <div>
                     <label className={labelCls}>{t.common.store} <span className="text-rose-400">*</span></label>
                     <select
@@ -443,7 +443,7 @@ export default function ProductDetailPage() {
             <div className={`${editCard} p-6`}>
               <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.productDetail.formEditPrice}</h3>
               <form onSubmit={handleUpdatePrice} noValidate className="space-y-5">
-                <div className="grid grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                   <div>
                     <label className={labelCls}>{t.common.store} <span className="text-rose-400">*</span></label>
                     <select
@@ -497,7 +497,7 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          <div className={`${card} overflow-hidden`}>
+          <div className={`${card} overflow-x-auto`}>
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
@@ -569,7 +569,7 @@ export default function ProductDetailPage() {
             <div className={`${card} p-6`}>
               <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.productDetail.formRecordPurchase}</h3>
               <form onSubmit={handleAddPurchase} noValidate className="space-y-5">
-                <div className="grid grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                   <div>
                     <label className={labelCls}>{t.common.store} <span className="text-rose-400">*</span></label>
                     <select
@@ -652,7 +652,7 @@ export default function ProductDetailPage() {
             <div className={`${editCard} p-6`}>
               <h3 className="text-sm font-semibold text-[#4a3728] mb-5">{t.productDetail.formEditPurchase}</h3>
               <form onSubmit={handleUpdatePurchase} noValidate className="space-y-5">
-                <div className="grid grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                   <div>
                     <label className={labelCls}>{t.common.store} <span className="text-rose-400">*</span></label>
                     <select
@@ -725,7 +725,7 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          <div className={`${card} overflow-hidden`}>
+          <div className={`${card} overflow-x-auto`}>
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
