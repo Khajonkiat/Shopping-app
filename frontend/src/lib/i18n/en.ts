@@ -158,6 +158,7 @@ export const en: Translations = {
     cheapestAt: "Cheapest at",
     noPrice: "No price recorded",
     inCart: "In cart",
+    estimatedTotal: "Estimated total",
   },
   auth: {
     login: "Log in",
@@ -175,5 +176,14 @@ export const en: Translations = {
     accountTitle: "Account Settings",
     passwordHint: "Leave blank to keep current password",
     accountSaved: "Account updated. Please log in again to see your new name.",
+    forgotPassword: "Forgot password?",
+    forgotPasswordTitle: "Reset your password",
+    forgotPasswordSubtitle: "Enter your email and we'll send a reset link.",
+    forgotPasswordSuccess: "If this email is registered, a reset link has been sent. Check your inbox or server logs.",
+    resetPasswordTitle: "Set a new password",
+    resetPasswordSubtitle: "Enter a new password for your account.",
+    resetPasswordSuccess: "Password updated. You can now log in.",
+    resetPasswordError: "This reset link is invalid or has expired.",
+    backToLogin: "Back to log in",
   },
 };

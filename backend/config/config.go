@@ -20,6 +20,11 @@ type Config struct {
 	MasterEmail     string
 	MasterUsername  string
 	MasterPassword  string
+	SMTPHost        string
+	SMTPPort        string
+	SMTPUser        string
+	SMTPPass        string
+	AppURL          string
 }
 
 func (c *Config) DSN() string {
@@ -54,6 +59,11 @@ func Load() *Config {
 		MasterEmail:    getEnv("MASTER_EMAIL", ""),
 		MasterUsername: getEnv("MASTER_USERNAME", "master"),
 		MasterPassword: getEnv("MASTER_PASSWORD", ""),
+		SMTPHost:       getEnv("SMTP_HOST", ""),
+		SMTPPort:       getEnv("SMTP_PORT", "587"),
+		SMTPUser:       getEnv("SMTP_USER", ""),
+		SMTPPass:       getEnv("SMTP_PASSWORD", ""),
+		AppURL:         getEnv("APP_URL", "http://localhost:3000"),
 	}
 }
 

@@ -45,6 +45,10 @@ func (h *PriceEntryHandler) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if entry.Price <= 0 {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "price must be greater than 0"})
+		return
+	}
 	if entry.RecordedAt.IsZero() {
 		entry.RecordedAt = time.Now()
 	}
@@ -68,6 +72,12 @@ func (h *PriceEntryHandler) Update(c *gin.Context) {
 	if err := c.ShouldBindJSON(&updates); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+	if p, ok := updates["price"]; ok {
+		if v, ok := p.(float64); !ok || v <= 0 {
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "price must be greater than 0"})
+			return
+		}
 	}
 	entry, err := h.svc.Update(id, getHouseholdID(c), updates)
 	if err != nil {

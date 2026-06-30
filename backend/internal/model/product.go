@@ -2,8 +2,8 @@ package model
 
 type Product struct {
 	Base
-	HouseholdID  uint           `gorm:"not null;index" json:"household_id"`
-	Name         string         `gorm:"not null;index" json:"name"`
+	HouseholdID  uint           `gorm:"not null;uniqueIndex:idx_product_household_name" json:"household_id"`
+	Name         string         `gorm:"not null;uniqueIndex:idx_product_household_name" json:"name"`
 	Category     string         `json:"category"`
 	Unit         string         `json:"unit"`
 	Description  string         `json:"description"`

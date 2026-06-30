@@ -32,6 +32,7 @@ func Connect(cfg *config.Config) (*gorm.DB, error) {
 		&model.PriceEntry{},
 		&model.Purchase{},
 		&model.ProductImage{},
+		&model.PasswordResetToken{},
 	); err != nil {
 		return nil, err
 	}

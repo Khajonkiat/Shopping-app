@@ -59,9 +59,16 @@ func (h *HouseholdHandler) Get(c *gin.Context) {
 
 func (h *HouseholdHandler) GenerateInvite(c *gin.Context) {
 	householdID := getHouseholdID(c)
-	invite, err := h.svc.GenerateInvite(householdID)
+	callerVal, _ := c.Get(middleware.UserIDKey)
+	uid, _ := callerVal.(uint)
+
+	invite, err := h.svc.GenerateInvite(householdID, uid)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if errors.Is(err, service.ErrNotAdmin) {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 	c.JSON(http.StatusCreated, invite)

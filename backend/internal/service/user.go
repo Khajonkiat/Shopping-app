@@ -1,6 +1,8 @@
 package service
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"time"
 	"wiki-shopping-app/backend/internal/model"
@@ -12,6 +14,7 @@ import (
 var ErrEmailTaken = errors.New("email already registered")
 var ErrInvalidCredentials = errors.New("invalid email or password")
 var ErrInvalidRole = errors.New("role must be 'master' or 'user'")
+var ErrResetTokenInvalid = errors.New("reset token is invalid or has expired")
 
 type AdminUserView struct {
 	ID            uint      `json:"id"`
@@ -193,4 +196,59 @@ func (s *UserService) EnsureMaster(email, username, password string) error {
 		PasswordHash: string(hash),
 		Role:         "master",
 	}).Error
+}
+
+// CreateResetToken generates a 1-hour password-reset token for the given email.
+// Returns ("", nil) when the email is not registered — callers should treat both
+// cases identically to prevent email enumeration.
+func (s *UserService) CreateResetToken(email string) (string, error) {
+	var user model.User
+	if err := s.db.Where("email = ?", email).First(&user).Error; err != nil {
+		return "", nil
+	}
+
+	// Invalidate any outstanding unused tokens for this user.
+	now := time.Now()
+	s.db.Model(&model.PasswordResetToken{}).
+		Where("user_id = ? AND used_at IS NULL", user.ID).
+		Update("used_at", &now)
+
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	token := hex.EncodeToString(b)
+
+	rt := &model.PasswordResetToken{
+		UserID:    user.ID,
+		Token:     token,
+		ExpiresAt: time.Now().Add(time.Hour),
+	}
+	if err := s.db.Create(rt).Error; err != nil {
+		return "", err
+	}
+	return token, nil
+}
+
+// ResetPassword validates the token and updates the user's password.
+func (s *UserService) ResetPassword(token, newPassword string) error {
+	var rt model.PasswordResetToken
+	err := s.db.Where("token = ? AND expires_at > ? AND used_at IS NULL", token, time.Now()).
+		First(&rt).Error
+	if err != nil {
+		return ErrResetTokenInvalid
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	if err := s.db.Model(&model.User{}).Where("id = ?", rt.UserID).
+		Update("password_hash", string(hash)).Error; err != nil {
+		return err
+	}
+
+	used := time.Now()
+	return s.db.Model(&rt).Update("used_at", &used).Error
 }

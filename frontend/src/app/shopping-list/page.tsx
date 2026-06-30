@@ -169,6 +169,8 @@ export default function ShoppingListPage() {
   const filtered = q ? products.filter((p) => p.name.toLowerCase().includes(q)) : products;
   const unchecked = filtered.filter((p) => !checked.has(p.id));
   const checkedItems = filtered.filter((p) => checked.has(p.id));
+  const estimatedTotal = unchecked.reduce((sum, p) => sum + (productSummary.get(p.id)?.price ?? 0), 0);
+  const hasPricedItems = unchecked.some((p) => productSummary.has(p.id));
 
   if (!ready || loading) return <SkeletonShoppingList />;
 
@@ -180,6 +182,12 @@ export default function ShoppingListPage() {
           <p className="text-sm text-[#7a6858] mt-1">
             {products.length} {t.shoppingList.subtitle}
           </p>
+          {hasPricedItems && (
+            <p className="text-sm text-[#7a6858] mt-0.5">
+              {t.shoppingList.estimatedTotal}:{" "}
+              <span className="font-semibold text-[#1a1208]">฿{estimatedTotal.toFixed(2)}</span>
+            </p>
+          )}
         </div>
         {checked.size > 0 && (
           <button

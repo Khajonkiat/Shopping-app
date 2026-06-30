@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"wiki-shopping-app/backend/config"
 	"wiki-shopping-app/backend/internal/handler"
 	"wiki-shopping-app/backend/internal/middleware"
 	"wiki-shopping-app/backend/internal/service"
@@ -10,11 +11,15 @@ import (
 	"gorm.io/gorm"
 )
 
-func Setup(db *gorm.DB, uploadDir string, jwtSecret string) *gin.Engine {
+func Setup(db *gorm.DB, uploadDir string, cfg *config.Config) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(corsMiddleware())
 	r.Static("/uploads", uploadDir)
+
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
 
 	userSvc := service.NewUserService(db)
 	householdSvc := service.NewHouseholdService(db)
@@ -24,7 +29,7 @@ func Setup(db *gorm.DB, uploadDir string, jwtSecret string) *gin.Engine {
 	purchaseSvc := service.NewPurchaseService(db)
 	imageSvc := service.NewProductImageService(db)
 
-	authH := handler.NewAuthHandler(userSvc, householdSvc, jwtSecret)
+	authH := handler.NewAuthHandler(userSvc, householdSvc, cfg)
 	adminH := handler.NewAdminHandler(userSvc)
 	householdH := handler.NewHouseholdHandler(householdSvc)
 	productH := handler.NewProductHandler(productSvc)
@@ -41,11 +46,13 @@ func Setup(db *gorm.DB, uploadDir string, jwtSecret string) *gin.Engine {
 	{
 		auth.POST("/register", authH.Register)
 		auth.POST("/login", authH.Login)
+		auth.POST("/forgot-password", authH.ForgotPassword)
+		auth.POST("/reset-password", authH.ResetPassword)
 	}
 
 	// All other routes require a valid JWT
 	protected := api.Group("")
-	protected.Use(middleware.Auth(jwtSecret))
+	protected.Use(middleware.Auth(cfg.JWTSecret))
 	{
 		// Self-service account update + token refresh (any authenticated user)
 		protected.PATCH("/auth/me", authH.UpdateMe)

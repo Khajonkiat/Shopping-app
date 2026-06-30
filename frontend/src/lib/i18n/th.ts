@@ -158,6 +158,7 @@ export const th: Translations = {
     cheapestAt: "ถูกที่สุดที่",
     noPrice: "ยังไม่มีราคา",
     inCart: "ในตะกร้า",
+    estimatedTotal: "ราคาประมาณ",
   },
   auth: {
     login: "เข้าสู่ระบบ",
@@ -175,5 +176,14 @@ export const th: Translations = {
     accountTitle: "ตั้งค่าบัญชี",
     passwordHint: "ปล่อยว่างเพื่อเก็บรหัสผ่านเดิม",
     accountSaved: "อัปเดตบัญชีแล้ว กรุณาเข้าสู่ระบบใหม่เพื่อดูชื่อที่เปลี่ยน",
+    forgotPassword: "ลืมรหัสผ่าน?",
+    forgotPasswordTitle: "รีเซ็ตรหัสผ่าน",
+    forgotPasswordSubtitle: "กรอกอีเมลของคุณเพื่อรับลิงก์รีเซ็ต",
+    forgotPasswordSuccess: "หากอีเมลนี้ลงทะเบียนไว้แล้ว ลิงก์รีเซ็ตจะถูกส่งไป ตรวจสอบกล่องจดหมายหรือ server logs",
+    resetPasswordTitle: "ตั้งรหัสผ่านใหม่",
+    resetPasswordSubtitle: "กรอกรหัสผ่านใหม่สำหรับบัญชีของคุณ",
+    resetPasswordSuccess: "อัปเดตรหัสผ่านแล้ว ตอนนี้คุณสามารถเข้าสู่ระบบได้",
+    resetPasswordError: "ลิงก์รีเซ็ตนี้ไม่ถูกต้องหรือหมดอายุแล้ว",
+    backToLogin: "กลับไปหน้าเข้าสู่ระบบ",
   },
 };
