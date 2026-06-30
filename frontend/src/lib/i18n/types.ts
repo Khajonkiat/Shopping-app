@@ -162,6 +162,7 @@ export interface Translations {
     cheapestAt: string;
     noPrice: string;
     inCart: string;
+    estimatedTotal: string;
   };
   auth: {
     login: string;
@@ -179,5 +180,14 @@ export interface Translations {
     accountTitle: string;
     passwordHint: string;
     accountSaved: string;
+    forgotPassword: string;
+    forgotPasswordTitle: string;
+    forgotPasswordSubtitle: string;
+    forgotPasswordSuccess: string;
+    resetPasswordTitle: string;
+    resetPasswordSubtitle: string;
+    resetPasswordSuccess: string;
+    resetPasswordError: string;
+    backToLogin: string;
   };
 }

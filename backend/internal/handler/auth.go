@@ -2,8 +2,10 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
+	"wiki-shopping-app/backend/config"
 	"wiki-shopping-app/backend/internal/middleware"
 	"wiki-shopping-app/backend/internal/service"
 
@@ -15,10 +17,11 @@ type AuthHandler struct {
 	svc          *service.UserService
 	householdSvc *service.HouseholdService
 	jwtSecret    string
+	cfg          *config.Config
 }
 
-func NewAuthHandler(svc *service.UserService, householdSvc *service.HouseholdService, jwtSecret string) *AuthHandler {
-	return &AuthHandler{svc: svc, householdSvc: householdSvc, jwtSecret: jwtSecret}
+func NewAuthHandler(svc *service.UserService, householdSvc *service.HouseholdService, cfg *config.Config) *AuthHandler {
+	return &AuthHandler{svc: svc, householdSvc: householdSvc, jwtSecret: cfg.JWTSecret, cfg: cfg}
 }
 
 type registerRequest struct {
@@ -145,6 +148,56 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
+}
+
+func (h *AuthHandler) ForgotPassword(c *gin.Context) {
+	var body struct {
+		Email string `json:"email" binding:"required,email"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	token, err := h.svc.CreateResetToken(body.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate reset token"})
+		return
+	}
+
+	if token != "" {
+		resetURL := fmt.Sprintf("%s/reset-password?token=%s", h.cfg.AppURL, token)
+		// Best-effort: log on SMTP failure rather than exposing the error to the caller.
+		if err := service.SendResetEmail(h.cfg, body.Email, resetURL); err != nil {
+			// Already logged inside SendResetEmail; don't block the response.
+			_ = err
+		}
+	}
+
+	// Always return the same response to prevent email enumeration.
+	c.JSON(http.StatusOK, gin.H{"message": "If this email is registered, a reset link has been sent."})
+}
+
+func (h *AuthHandler) ResetPassword(c *gin.Context) {
+	var body struct {
+		Token    string `json:"token" binding:"required"`
+		Password string `json:"password" binding:"required,min=6"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.svc.ResetPassword(body.Token, body.Password); err != nil {
+		if errors.Is(err, service.ErrResetTokenInvalid) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password updated successfully."})
 }
 
 func (h *AuthHandler) makeToken(userID uint, email, username, role string, householdID uint) (string, error) {

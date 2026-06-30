@@ -39,7 +39,7 @@ func main() {
 		log.Println("warning: MASTER_EMAIL / MASTER_PASSWORD not set — no master account provisioned")
 	}
 
-	r := router.Setup(database, uploadDir, cfg.JWTSecret)
+	r := router.Setup(database, uploadDir, cfg)
 
 	if err := r.Run(":" + cfg.ServerPort); err != nil {
 		log.Fatalf("failed to start server: %v", err)

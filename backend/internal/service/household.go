@@ -77,7 +77,14 @@ func (s *HouseholdService) GetByID(id uint) (*model.Household, error) {
 	return &h, nil
 }
 
-func (s *HouseholdService) GenerateInvite(householdID uint) (*model.HouseholdInvite, error) {
+func (s *HouseholdService) GenerateInvite(householdID, callerID uint) (*model.HouseholdInvite, error) {
+	var h model.Household
+	if err := s.db.First(&h, householdID).Error; err != nil {
+		return nil, err
+	}
+	if h.AdminID != callerID {
+		return nil, ErrNotAdmin
+	}
 	b := make([]byte, 16)
 	if _, err := rand.Read(b); err != nil {
 		return nil, err
