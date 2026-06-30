@@ -8,6 +8,7 @@ export const en: Translations = {
     purchases: "Purchases",
     household: "Household",
     users: "Users",
+    shoppingList: "Shopping List",
   },
   admin: {
     title: "User Management",
@@ -148,6 +149,15 @@ export const en: Translations = {
     joinButton: "Join",
     joinSuccess: "Joined household successfully. Please log in again to refresh your session.",
     joinError: "Invalid or expired invite code.",
+  },
+  shoppingList: {
+    title: "Shopping List",
+    subtitle: "items",
+    clearChecked: "Clear checked",
+    noData: "No products yet — add some from the Products page.",
+    cheapestAt: "Cheapest at",
+    noPrice: "No price recorded",
+    inCart: "In cart",
   },
   auth: {
     login: "Log in",

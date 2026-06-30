@@ -8,6 +8,7 @@ export const th: Translations = {
     purchases: "การซื้อ",
     household: "ครัวเรือน",
     users: "ผู้ใช้งาน",
+    shoppingList: "รายการช็อปปิ้ง",
   },
   admin: {
     title: "จัดการผู้ใช้งาน",
@@ -148,6 +149,15 @@ export const th: Translations = {
     joinButton: "เข้าร่วม",
     joinSuccess: "เข้าร่วมครัวเรือนสำเร็จ กรุณาล็อกอินใหม่เพื่ออัปเดตเซสชัน",
     joinError: "รหัสเชิญไม่ถูกต้องหรือหมดอายุแล้ว",
+  },
+  shoppingList: {
+    title: "รายการช็อปปิ้ง",
+    subtitle: "รายการ",
+    clearChecked: "ล้างรายการที่เลือก",
+    noData: "ยังไม่มีสินค้า — เพิ่มจากหน้าสินค้า",
+    cheapestAt: "ถูกที่สุดที่",
+    noPrice: "ยังไม่มีราคา",
+    inCart: "ในตะกร้า",
   },
   auth: {
     login: "เข้าสู่ระบบ",

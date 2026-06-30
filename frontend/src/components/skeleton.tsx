@@ -55,17 +55,17 @@ export function SkeletonProducts() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
-              {[0, 1, 2, 3, 4].map((i) => <th key={i} className="px-4 py-3" />)}
+              {[0, 1, 2, 3, 4, 5].map((i) => <th key={i} className="px-4 py-3" />)}
             </tr>
           </thead>
           <tbody>
             {[
-              ["w-3/5", "w-2/5", "w-1/3"],
-              ["w-full", "w-1/2", "w-1/4"],
-              ["w-4/5", "w-3/5", "w-2/5"],
-              ["w-2/3", "w-1/4", "w-1/2"],
-              ["w-full", "w-2/5", "w-1/3"],
-              ["w-3/4", "w-1/3", "w-1/4"],
+              ["w-3/5", "w-2/5", "w-1/3", "w-20"],
+              ["w-full", "w-1/2", "w-1/4", "w-16"],
+              ["w-4/5", "w-3/5", "w-2/5", "w-20"],
+              ["w-2/3", "w-1/4", "w-1/2", "w-16"],
+              ["w-full", "w-2/5", "w-1/3", "w-20"],
+              ["w-3/4", "w-1/3", "w-1/4", "w-16"],
             ].map((widths, i) => (
               <tr key={i} className="border-b border-[#e8dfd5] last:border-0">
                 <td className="px-3 py-2 w-12">
@@ -81,6 +81,34 @@ export function SkeletonProducts() {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Shopping List ──────────────────────────────────────── */
+
+export function SkeletonShoppingList() {
+  return (
+    <div className="space-y-8 max-w-2xl">
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <Bar w="w-40" h="h-8" />
+          <Bar w="w-16" />
+        </div>
+      </div>
+      <Bar w="w-full" h="h-10" />
+      <div className={`${card} divide-y divide-[#e8dfd5]`}>
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="flex items-center gap-3 px-4 py-3">
+            <Bar w="w-5" h="h-5" />
+            <Bar w="w-9" h="h-9" />
+            <div className="flex-1 space-y-1.5">
+              <Bar w={i % 2 === 0 ? "w-2/5" : "w-1/2"} />
+              <Bar w={i % 3 === 0 ? "w-1/3" : "w-1/4"} h="h-3" />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

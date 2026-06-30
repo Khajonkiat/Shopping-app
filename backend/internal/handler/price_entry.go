@@ -17,6 +17,15 @@ func NewPriceEntryHandler(svc *service.PriceEntryService) *PriceEntryHandler {
 	return &PriceEntryHandler{svc: svc}
 }
 
+func (h *PriceEntryHandler) List(c *gin.Context) {
+	entries, err := h.svc.ListAll(getHouseholdID(c))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, entries)
+}
+
 func (h *PriceEntryHandler) ListByProduct(c *gin.Context) {
 	productID, err := parseID(c, "id")
 	if err != nil {

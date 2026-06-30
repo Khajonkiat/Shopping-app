@@ -12,6 +12,28 @@ import { useToast } from "@/lib/use-toast";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { SkeletonProductDetail } from "@/components/skeleton";
 
+function Sparkline({ values }: { values: number[] }) {
+  if (values.length < 2) return <span className="text-[#c4b5a5] text-xs">—</span>;
+  const W = 64, H = 24, pad = 2;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const pts = values
+    .map((v, i) => {
+      const x = pad + (i / (values.length - 1)) * (W - pad * 2);
+      const y = H - pad - ((v - min) / range) * (H - pad * 2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+  const first = values[0], last = values[values.length - 1];
+  const stroke = last < first ? "#16a34a" : last > first ? "#dc2626" : "#a0907c";
+  return (
+    <svg width={W} height={H} className="inline-block align-middle">
+      <polyline points={pts} fill="none" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function toISO(dateStr: string): string | undefined {
   return dateStr ? `${dateStr}T00:00:00Z` : undefined;
 }
@@ -277,10 +299,18 @@ export default function ProductDetailPage() {
         .filter((p) => p.store_id === store.id)
         .sort((a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime());
       if (storePrices.length === 0) return null;
-      return { store, latestPrice: storePrices[0].price, lastRecorded: storePrices[0].recorded_at, count: storePrices.length };
+      return {
+        store,
+        latestPrice: storePrices[0].price,
+        lastRecorded: storePrices[0].recorded_at,
+        count: storePrices.length,
+        trendValues: storePrices.map((p) => p.price).reverse(), // oldest→newest for sparkline
+      };
     })
     .filter(Boolean)
-    .sort((a, b) => a!.latestPrice - b!.latestPrice) as { store: Store; latestPrice: number; lastRecorded: string; count: number }[];
+    .sort((a, b) => a!.latestPrice - b!.latestPrice) as {
+      store: Store; latestPrice: number; lastRecorded: string; count: number; trendValues: number[];
+    }[];
 
   if (!ready || !product) return <SkeletonProductDetail />;
 
@@ -332,10 +362,11 @@ export default function ProductDetailPage() {
                 <th className={th}>{t.common.price}</th>
                 <th className={th}>{t.productDetail.lastRecorded}</th>
                 <th className={th}>{t.productDetail.priceCount}</th>
+                <th className={th}>Trend</th>
               </tr>
             </thead>
             <tbody>
-              {storeComparison.map(({ store, latestPrice, lastRecorded, count }, i) => (
+              {storeComparison.map(({ store, latestPrice, lastRecorded, count, trendValues }, i) => (
                 <tr key={store.id} className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${i === 0 ? "bg-[#f5fdf3]" : "hover:bg-[#fdf9f5]"}`}>
                   <td className={`${td} font-medium text-[#1a1208]`}>
                     {store.name}
@@ -353,6 +384,9 @@ export default function ProductDetailPage() {
                   </td>
                   <td className={`${td} text-[#a0907c]`}>
                     {count}
+                  </td>
+                  <td className={td}>
+                    <Sparkline values={trendValues} />
                   </td>
                 </tr>
               ))}

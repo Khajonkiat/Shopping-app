@@ -8,6 +8,7 @@ export interface Translations {
     purchases: string;
     household: string;
     users: string;
+    shoppingList: string;
   };
   admin: {
     title: string;
@@ -152,6 +153,15 @@ export interface Translations {
     joinButton: string;
     joinSuccess: string;
     joinError: string;
+  };
+  shoppingList: {
+    title: string;
+    subtitle: string;
+    clearChecked: string;
+    noData: string;
+    cheapestAt: string;
+    noPrice: string;
+    inCart: string;
   };
   auth: {
     login: string;

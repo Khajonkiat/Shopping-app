@@ -35,8 +35,9 @@ func Setup(db *gorm.DB, uploadDir string, jwtSecret string) *gin.Engine {
 
 	api := r.Group("/api/v1")
 
-	// Public auth routes
+	// Public auth routes (rate-limited)
 	auth := api.Group("/auth")
+	auth.Use(middleware.AuthRateLimit())
 	{
 		auth.POST("/register", authH.Register)
 		auth.POST("/login", authH.Login)
@@ -91,6 +92,7 @@ func Setup(db *gorm.DB, uploadDir string, jwtSecret string) *gin.Engine {
 			stores.DELETE("/:id", storeH.Delete)
 		}
 
+		protected.GET("/prices", priceEntryH.List)
 		protected.POST("/prices", priceEntryH.Create)
 		protected.PATCH("/prices/:id", priceEntryH.Update)
 		protected.DELETE("/prices/:id", priceEntryH.Delete)

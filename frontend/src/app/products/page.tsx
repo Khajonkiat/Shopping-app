@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { api, imageUrl } from "@/lib/api";
 import { card, editCard, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/lib/styles";
-import type { Product, ProductImage } from "@/lib/types";
+import type { PriceEntry, Product, ProductImage } from "@/lib/types";
 import Link from "next/link";
 import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
@@ -18,8 +18,9 @@ const emptyForm = { name: "", category: "", unit: "", description: "" };
 export default function ProductsPage() {
   const { t } = useLocale();
   const { ready } = useRequireAuth();
-  const { message: toastMsg, toast, dismiss } = useToast();
+  const { message: toastMsg, toastType, toast, dismiss } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
+  const [allPrices, setAllPrices] = useState<PriceEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -35,11 +36,31 @@ export default function ProductsPage() {
 
   useEffect(() => {
     if (!ready) return;
-    api.products.list()
-      .then(setProducts)
+    Promise.all([api.products.list(), api.prices.listAll()])
+      .then(([prods, prices]) => { setProducts(prods); setAllPrices(prices); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [ready]);
+
+  // Per-product: [0] = latest, [1] = previous (API returns DESC)
+  const pricesByProduct = new Map<number, PriceEntry[]>();
+  for (const e of allPrices) {
+    const arr = pricesByProduct.get(e.product_id) ?? [];
+    arr.push(e);
+    pricesByProduct.set(e.product_id, arr);
+  }
+
+  function priceIndicator(productId: number): { price: number; delta: number | null } | null {
+    const entries = pricesByProduct.get(productId);
+    if (!entries?.length) return null;
+    const latest = entries[0];
+    const prev = entries[1];
+    const delta =
+      prev && prev.store_id === latest.store_id
+        ? ((latest.price - prev.price) / prev.price) * 100
+        : null;
+    return { price: latest.price, delta };
+  }
 
   function set(field: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -297,6 +318,7 @@ export default function ProductsPage() {
                 <th className={th}>{t.common.name}</th>
                 <th className={th}>{t.common.category}</th>
                 <th className={th}>{t.common.unit}</th>
+                <th className={th}>{t.common.price}</th>
                 <th className={th} />
               </tr>
             </thead>
@@ -335,6 +357,28 @@ export default function ProductsPage() {
                   </td>
                   <td className={`${td} text-[#7a6858]`}>{p.category || <span className="text-[#c4b5a5]">—</span>}</td>
                   <td className={`${td} text-[#7a6858]`}>{p.unit || <span className="text-[#c4b5a5]">—</span>}</td>
+                  <td className={td}>
+                    {(() => {
+                      const ind = priceIndicator(p.id);
+                      if (!ind) return <span className="text-[#c4b5a5] text-sm">—</span>;
+                      return (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm font-semibold text-[#1a1208]">฿{ind.price.toFixed(2)}</span>
+                          {ind.delta !== null && (
+                            <span className={`inline-flex items-center text-xs font-semibold px-1.5 py-0.5 rounded-full ${
+                              ind.delta < 0
+                                ? "bg-emerald-50 text-emerald-700"
+                                : ind.delta > 0
+                                ? "bg-rose-50 text-rose-700"
+                                : "bg-[#f0ece8] text-[#a0907c]"
+                            }`}>
+                              {ind.delta < 0 ? "▼" : "▲"} {Math.abs(ind.delta).toFixed(0)}%
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </td>
                   <td className={`${td} text-right`}>
                     <div className="flex items-center justify-end gap-3">
                       <button
@@ -366,7 +410,7 @@ export default function ProductsPage() {
           onCancel={() => setPendingDeleteId(null)}
         />
       )}
-      {toastMsg && <Toast message={toastMsg} onDismiss={dismiss} />}
+      {toastMsg && <Toast message={toastMsg} type={toastType} onDismiss={dismiss} />}
     </div>
   );
 }

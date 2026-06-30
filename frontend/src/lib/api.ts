@@ -91,6 +91,7 @@ export const api = {
   },
 
   prices: {
+    listAll: () => request<PriceEntry[]>("/prices"),
     create: (data: Partial<PriceEntry>) =>
       request<PriceEntry>("/prices", {
         method: "POST",

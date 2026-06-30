@@ -14,6 +14,15 @@ func NewPriceEntryService(db *gorm.DB) *PriceEntryService {
 	return &PriceEntryService{db: db}
 }
 
+func (s *PriceEntryService) ListAll(householdID uint) ([]model.PriceEntry, error) {
+	var entries []model.PriceEntry
+	err := s.db.Preload("Store").
+		Where("household_id = ?", householdID).
+		Order("recorded_at DESC").
+		Find(&entries).Error
+	return entries, err
+}
+
 func (s *PriceEntryService) ListByProduct(productID, householdID uint) ([]model.PriceEntry, error) {
 	var entries []model.PriceEntry
 	err := s.db.Preload("Store").
