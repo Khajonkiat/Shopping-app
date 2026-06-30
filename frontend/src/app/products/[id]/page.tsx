@@ -10,6 +10,7 @@ import { useRequireAuth } from "@/lib/use-require-auth";
 import { Toast } from "@/components/toast";
 import { useToast } from "@/lib/use-toast";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { SkeletonProductDetail } from "@/components/skeleton";
 
 function toISO(dateStr: string): string | undefined {
   return dateStr ? `${dateStr}T00:00:00Z` : undefined;
@@ -270,23 +271,18 @@ export default function ProductDetailPage() {
     toast(t.common.toastDeleted);
   }
 
-  const latestPerStore = stores
+  const storeComparison = stores
     .map((store) => {
-      const entry = prices
+      const storePrices = prices
         .filter((p) => p.store_id === store.id)
-        .sort((a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime())[0];
-      return entry ? { store, price: entry.price } : null;
+        .sort((a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime());
+      if (storePrices.length === 0) return null;
+      return { store, latestPrice: storePrices[0].price, lastRecorded: storePrices[0].recorded_at, count: storePrices.length };
     })
     .filter(Boolean)
-    .sort((a, b) => a!.price - b!.price) as { store: Store; price: number }[];
+    .sort((a, b) => a!.latestPrice - b!.latestPrice) as { store: Store; latestPrice: number; lastRecorded: string; count: number }[];
 
-  if (!ready || !product) {
-    return (
-      <div className="flex items-center justify-center h-48">
-        <div className="w-5 h-5 rounded-full border-2 border-[#d9cfc3] border-t-[#b07040] animate-spin" />
-      </div>
-    );
-  }
+  if (!ready || !product) return <SkeletonProductDetail />;
 
   const tabs = [
     { key: "prices" as const, label: t.productDetail.pricesTab, count: prices.length },
@@ -322,26 +318,46 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Price comparison */}
-      {latestPerStore.length > 0 && (
-        <div className="flex flex-wrap gap-3">
-          {latestPerStore.map(({ store, price }, i) => (
-            <div
-              key={store.id}
-              className={`${card} px-5 py-4 min-w-[120px] ${
-                i === 0 ? "border-emerald-200" : ""
-              }`}
-            >
-              <div className="text-xs font-medium text-[#a0907c] mb-1">{store.name}</div>
-              <div className={`text-xl font-bold tracking-tight ${i === 0 ? "text-emerald-700" : "text-[#1a1208]"}`}>
-                ฿{price.toFixed(2)}
-              </div>
-              {i === 0 && latestPerStore.length > 1 && (
-                <div className="mt-1 text-xs font-semibold text-emerald-600 uppercase tracking-wide">
-                  {t.productDetail.cheapest}
-                </div>
-              )}
-            </div>
-          ))}
+      {storeComparison.length > 0 && (
+        <div className={`${card} overflow-hidden`}>
+          <div className="px-4 py-2.5 border-b border-[#d9cfc3] bg-[#f0e7d8]">
+            <p className="text-xs font-semibold text-[#5c4433] uppercase tracking-wider">
+              {t.productDetail.priceComparison}
+            </p>
+          </div>
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[#d9cfc3] bg-[#f8f4ef]">
+                <th className={th}>{t.common.store}</th>
+                <th className={th}>{t.common.price}</th>
+                <th className={th}>{t.productDetail.lastRecorded}</th>
+                <th className={th}>{t.productDetail.priceCount}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {storeComparison.map(({ store, latestPrice, lastRecorded, count }, i) => (
+                <tr key={store.id} className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${i === 0 ? "bg-[#f5fdf3]" : "hover:bg-[#fdf9f5]"}`}>
+                  <td className={`${td} font-medium text-[#1a1208]`}>
+                    {store.name}
+                    {i === 0 && storeComparison.length > 1 && (
+                      <span className="ml-2 text-xs font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                        {t.productDetail.cheapest}
+                      </span>
+                    )}
+                  </td>
+                  <td className={`${td} font-bold ${i === 0 ? "text-emerald-700" : "text-[#1a1208]"}`}>
+                    ฿{latestPrice.toFixed(2)}
+                  </td>
+                  <td className={`${td} text-[#a0907c]`}>
+                    {new Date(lastRecorded).toLocaleDateString()}
+                  </td>
+                  <td className={`${td} text-[#a0907c]`}>
+                    {count}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 

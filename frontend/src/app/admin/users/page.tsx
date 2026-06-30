@@ -6,6 +6,7 @@ import { useRequireMaster } from "@/lib/use-require-master";
 import { useLocale } from "@/components/locale-provider";
 import { card, inputCls, btnPrimary, btnSecondary, labelCls, th, td } from "@/lib/styles";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { SkeletonAdminUsers } from "@/components/skeleton";
 import type { AdminUser } from "@/lib/types";
 
 const roleBadge = (role: string) =>
@@ -79,13 +80,7 @@ export default function AdminUsersPage() {
 
   const isSelf = (u: AdminUser) => u.id === me?.id;
 
-  if (!ready || loading) {
-    return (
-      <div className="flex items-center justify-center h-48">
-        <p className="text-[#a0907c] text-sm">{t.common.loading}</p>
-      </div>
-    );
-  }
+  if (!ready || loading) return <SkeletonAdminUsers />;
 
   return (
     <div className="space-y-6">

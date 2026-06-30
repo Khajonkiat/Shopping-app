@@ -134,6 +134,14 @@ func (s *UserService) DeleteUser(id uint) error {
 	return s.db.Delete(&model.User{}, id).Error
 }
 
+func (s *UserService) GetByID(id uint) (*model.User, error) {
+	var user model.User
+	if err := s.db.First(&user, id).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func (s *UserService) UpdateSelf(id uint, username, password string) (*model.User, error) {
 	var user model.User
 	if err := s.db.First(&user, id).Error; err != nil {

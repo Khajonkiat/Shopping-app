@@ -6,9 +6,11 @@ import type { Product, Purchase, Store } from "@/lib/types";
 import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { Toast } from "@/components/toast";
-import { Spinner } from "@/components/spinner";
+import { SkeletonPurchases } from "@/components/skeleton";
 import { useToast } from "@/lib/use-toast";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { useSearchPagination } from "@/lib/use-search-pagination";
+import { Pagination } from "@/components/pagination";
 
 function toISO(dateStr: string): string | undefined {
   return dateStr ? `${dateStr}T00:00:00Z` : undefined;
@@ -140,32 +142,50 @@ export default function PurchasesPage() {
 
   const totalSpend = purchases.reduce((sum, p) => sum + p.price * p.quantity, 0);
 
+  const { query, setQuery, slice: visiblePurchases, page, setPage, totalPages, from, to, total } =
+    useSearchPagination(
+      purchases,
+      (p, q) =>
+        (p.product?.name ?? "").toLowerCase().includes(q) ||
+        (p.store?.name ?? "").toLowerCase().includes(q) ||
+        (p.notes ?? "").toLowerCase().includes(q),
+      20
+    );
+
   if (!ready) return null;
-  if (loading) return <Spinner />;
+  if (loading) return <SkeletonPurchases />;
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[#1a1208]">{t.purchases.title}</h1>
-          {purchases.length > 0 ? (
-            <p className="text-sm text-[#7a6858] mt-1">
-              {purchases.length} {t.purchases.recordsSuffix}
-              <span className="mx-1.5 text-[#c4b5a5]">·</span>
-              <span className="font-medium text-[#4a3728]">
-                ฿{totalSpend.toLocaleString("th-TH", { minimumFractionDigits: 2 })} {t.purchases.totalSuffix}
-              </span>
-            </p>
-          ) : (
-            <p className="text-sm text-[#a0907c] mt-1">0 {t.purchases.recordsSuffix}</p>
-          )}
+      <div className="space-y-3">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-[#1a1208]">{t.purchases.title}</h1>
+            {purchases.length > 0 ? (
+              <p className="text-sm text-[#7a6858] mt-1">
+                {purchases.length} {t.purchases.recordsSuffix}
+                <span className="mx-1.5 text-[#c4b5a5]">·</span>
+                <span className="font-medium text-[#4a3728]">
+                  ฿{totalSpend.toLocaleString("th-TH", { minimumFractionDigits: 2 })} {t.purchases.totalSuffix}
+                </span>
+              </p>
+            ) : (
+              <p className="text-sm text-[#a0907c] mt-1">0 {t.purchases.recordsSuffix}</p>
+            )}
+          </div>
+          <button
+            className={showForm ? btnSecondary : btnPrimary}
+            onClick={() => { setShowForm((v) => !v); setError(null); cancelEdit(); }}
+          >
+            {showForm ? t.common.cancel : t.purchases.recordButton}
+          </button>
         </div>
-        <button
-          className={showForm ? btnSecondary : btnPrimary}
-          onClick={() => { setShowForm((v) => !v); setError(null); cancelEdit(); }}
-        >
-          {showForm ? t.common.cancel : t.purchases.recordButton}
-        </button>
+        <input
+          className={inputCls}
+          placeholder={t.common.search}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
       </div>
 
       {showForm && (
@@ -354,53 +374,56 @@ export default function PurchasesPage() {
         </div>
       )}
 
-      <div className={`${card} overflow-x-auto`}>
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
-              <th className={th}>{t.common.product}</th>
-              <th className={th}>{t.common.store}</th>
-              <th className={th}>{t.common.price}</th>
-              <th className={th}>{t.common.qty}</th>
-              <th className={th}>{t.common.total}</th>
-              <th className={th}>{t.common.date}</th>
-              <th className={th}>{t.common.notes}</th>
-              <th className={th} />
-            </tr>
-          </thead>
-          <tbody>
-            {purchases.length === 0 ? (
-              <tr key="empty">
-                <td colSpan={8} className="px-4 py-16 text-center text-[#a0907c] text-sm">
-                  {t.purchases.noData}
-                </td>
+      <div className={card}>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
+                <th className={th}>{t.common.product}</th>
+                <th className={th}>{t.common.store}</th>
+                <th className={th}>{t.common.price}</th>
+                <th className={th}>{t.common.qty}</th>
+                <th className={th}>{t.common.total}</th>
+                <th className={th}>{t.common.date}</th>
+                <th className={th}>{t.common.notes}</th>
+                <th className={th} />
               </tr>
-            ) : purchases.map((p) => (
-              <tr key={String(p.id)} className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${editingId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
-                <td className={`${td} font-medium text-[#1a1208]`}>{p.product?.name ?? `#${p.product_id}`}</td>
-                <td className={`${td} text-[#7a6858]`}>{p.store?.name ?? `#${p.store_id}`}</td>
-                <td className={`${td} text-[#4a3728]`}>฿{p.price.toFixed(2)}</td>
-                <td className={`${td} text-[#4a3728]`}>{p.quantity}</td>
-                <td className={`${td} font-semibold text-[#1a1208]`}>฿{(p.price * p.quantity).toFixed(2)}</td>
-                <td className={`${td} text-[#a0907c]`}>{new Date(p.purchased_at).toLocaleDateString()}</td>
-                <td className={`${td} text-[#a0907c]`}>{p.notes || <span className="text-[#c4b5a5]">—</span>}</td>
-                <td className={`${td} text-right`}>
-                  <div className="flex items-center justify-end gap-3">
-                    <button
-                      onClick={() => editingId === p.id ? cancelEdit() : startEdit(p)}
-                      className={`text-xs font-medium transition-colors ${editingId === p.id ? "text-[#b07040]" : "text-[#a0907c] hover:text-[#b07040]"}`}
-                    >
-                      {editingId === p.id ? t.common.cancel : t.common.edit}
-                    </button>
-                    <button onClick={() => setPendingDeleteId(p.id)} className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors">
-                      {t.common.delete}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {visiblePurchases.length === 0 ? (
+                <tr key="empty">
+                  <td colSpan={8} className="px-4 py-16 text-center text-[#a0907c] text-sm">
+                    {query ? t.common.noResults : t.purchases.noData}
+                  </td>
+                </tr>
+              ) : visiblePurchases.map((p) => (
+                <tr key={String(p.id)} className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${editingId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
+                  <td className={`${td} font-medium text-[#1a1208]`}>{p.product?.name ?? `#${p.product_id}`}</td>
+                  <td className={`${td} text-[#7a6858]`}>{p.store?.name ?? `#${p.store_id}`}</td>
+                  <td className={`${td} text-[#4a3728]`}>฿{p.price.toFixed(2)}</td>
+                  <td className={`${td} text-[#4a3728]`}>{p.quantity}</td>
+                  <td className={`${td} font-semibold text-[#1a1208]`}>฿{(p.price * p.quantity).toFixed(2)}</td>
+                  <td className={`${td} text-[#a0907c]`}>{new Date(p.purchased_at).toLocaleDateString()}</td>
+                  <td className={`${td} text-[#a0907c]`}>{p.notes || <span className="text-[#c4b5a5]">—</span>}</td>
+                  <td className={`${td} text-right`}>
+                    <div className="flex items-center justify-end gap-3">
+                      <button
+                        onClick={() => editingId === p.id ? cancelEdit() : startEdit(p)}
+                        className={`text-xs font-medium transition-colors ${editingId === p.id ? "text-[#b07040]" : "text-[#a0907c] hover:text-[#b07040]"}`}
+                      >
+                        {editingId === p.id ? t.common.cancel : t.common.edit}
+                      </button>
+                      <button onClick={() => setPendingDeleteId(p.id)} className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors">
+                        {t.common.delete}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <Pagination page={page} totalPages={totalPages} from={from} to={to} total={total} onPage={setPage} />
       </div>
 
       {pendingDeleteId !== null && (

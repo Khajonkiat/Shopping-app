@@ -18,6 +18,31 @@ func NewHouseholdHandler(svc *service.HouseholdService) *HouseholdHandler {
 	return &HouseholdHandler{svc: svc}
 }
 
+func (h *HouseholdHandler) Rename(c *gin.Context) {
+	householdID := getHouseholdID(c)
+	callerID, _ := c.Get(middleware.UserIDKey)
+	uid, _ := callerID.(uint)
+
+	var body struct {
+		Name string `json:"name" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	household, err := h.svc.Rename(householdID, uid, body.Name)
+	if err != nil {
+		if errors.Is(err, service.ErrNotAdmin) {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+	c.JSON(http.StatusOK, household)
+}
+
 func (h *HouseholdHandler) Get(c *gin.Context) {
 	householdID := getHouseholdID(c)
 	household, err := h.svc.GetByID(householdID)

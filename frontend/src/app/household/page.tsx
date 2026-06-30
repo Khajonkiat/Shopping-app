@@ -1,11 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
-import { card } from "@/lib/styles";
+import { card, inputCls, btnPrimary, btnSecondary } from "@/lib/styles";
 import type { Household } from "@/lib/types";
+import { SkeletonHousehold } from "@/components/skeleton";
 
 export default function HouseholdPage() {
   const { t } = useLocale();
@@ -19,11 +20,34 @@ export default function HouseholdPage() {
   const [joinError, setJoinError] = useState("");
   const [joinSuccess, setJoinSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [renaming, setRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState("");
+  const [renameSubmitting, setRenameSubmitting] = useState(false);
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!ready) return;
     api.household.get().then(setHousehold).finally(() => setLoading(false));
   }, [ready]);
+
+  function startRename() {
+    setRenameValue(household?.name ?? "");
+    setRenaming(true);
+    setTimeout(() => renameInputRef.current?.focus(), 0);
+  }
+
+  async function handleRename(e: React.FormEvent) {
+    e.preventDefault();
+    if (!renameValue.trim()) return;
+    setRenameSubmitting(true);
+    try {
+      const updated = await api.household.rename(renameValue.trim());
+      setHousehold(updated);
+      setRenaming(false);
+    } finally {
+      setRenameSubmitting(false);
+    }
+  }
 
   async function handleGenerateInvite() {
     try {
@@ -52,13 +76,7 @@ export default function HouseholdPage() {
     }
   }
 
-  if (!ready || loading) {
-    return (
-      <div className="flex items-center justify-center h-48">
-        <p className="text-[#a0907c] text-sm">{t.common.loading}</p>
-      </div>
-    );
-  }
+  if (!ready || loading) return <SkeletonHousehold />;
 
   const isAdmin = household?.admin_id === user?.id;
 
@@ -72,7 +90,43 @@ export default function HouseholdPage() {
             <p className="text-xs font-semibold text-[#5c4433] uppercase tracking-wider mb-1">
               {t.household.title}
             </p>
-            <p className="text-lg font-semibold text-[#1a1208]">{household.name}</p>
+            {renaming ? (
+              <form onSubmit={handleRename} className="flex items-center gap-2 mt-1">
+                <input
+                  ref={renameInputRef}
+                  className={inputCls}
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  className={btnPrimary}
+                  disabled={!renameValue.trim() || renameSubmitting}
+                >
+                  {renameSubmitting ? t.common.saving : t.common.save}
+                </button>
+                <button
+                  type="button"
+                  className={btnSecondary}
+                  onClick={() => setRenaming(false)}
+                  disabled={renameSubmitting}
+                >
+                  {t.common.cancel}
+                </button>
+              </form>
+            ) : (
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-lg font-semibold text-[#1a1208]">{household.name}</p>
+                {isAdmin && (
+                  <button
+                    onClick={startRename}
+                    className="text-xs text-[#a0907c] hover:text-[#b07040] transition-colors"
+                  >
+                    {t.common.rename}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           <div>

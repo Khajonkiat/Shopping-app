@@ -55,6 +55,10 @@ export interface Translations {
     // select placeholders
     selectStore: string;
     selectProduct: string;
+    // search / pagination
+    search: string;
+    noResults: string;
+    rename: string;
     // toast messages
     toastSaved: string;
     toastUpdated: string;
@@ -96,6 +100,9 @@ export interface Translations {
   productDetail: {
     back: string;
     cheapest: string;
+    priceComparison: string;
+    lastRecorded: string;
+    priceCount: string;
     pricesTab: string;
     purchasesTab: string;
     imagesTab: string;
