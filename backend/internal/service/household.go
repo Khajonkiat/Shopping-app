@@ -11,6 +11,7 @@ import (
 )
 
 var ErrInviteNotFound = errors.New("invite not found or expired")
+var ErrNotAdmin = errors.New("only the household admin can do this")
 
 type HouseholdService struct {
 	db *gorm.DB
@@ -52,6 +53,20 @@ func (s *HouseholdService) EnsureMasterHousehold(masterEmail string) error {
 	s.db.Model(&model.PriceEntry{}).Where("household_id = 0").Update("household_id", hid)
 	s.db.Model(&model.Purchase{}).Where("household_id = 0").Update("household_id", hid)
 	return nil
+}
+
+func (s *HouseholdService) Rename(id, callerID uint, name string) (*model.Household, error) {
+	var h model.Household
+	if err := s.db.First(&h, id).Error; err != nil {
+		return nil, err
+	}
+	if h.AdminID != callerID {
+		return nil, ErrNotAdmin
+	}
+	if err := s.db.Model(&h).Update("name", name).Error; err != nil {
+		return nil, err
+	}
+	return s.GetByID(id)
 }
 
 func (s *HouseholdService) GetByID(id uint) (*model.Household, error) {

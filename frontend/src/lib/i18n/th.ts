@@ -8,6 +8,7 @@ export const th: Translations = {
     purchases: "การซื้อ",
     household: "ครัวเรือน",
     users: "ผู้ใช้งาน",
+    shoppingList: "รายการช็อปปิ้ง",
   },
   admin: {
     title: "จัดการผู้ใช้งาน",
@@ -53,6 +54,9 @@ export const th: Translations = {
     baseUrl: "URL ร้านค้า",
     selectStore: "เลือกร้านค้า",
     selectProduct: "เลือกสินค้า",
+    search: "ค้นหา…",
+    noResults: "ไม่พบรายการ",
+    rename: "เปลี่ยนชื่อ",
     toastSaved: "บันทึกแล้ว!",
     toastUpdated: "อัปเดตแล้ว!",
     toastDeleted: "ลบแล้ว!",
@@ -93,6 +97,9 @@ export const th: Translations = {
   productDetail: {
     back: "← สินค้า",
     cheapest: "ถูกที่สุด",
+    priceComparison: "เปรียบเทียบราคา",
+    lastRecorded: "บันทึกล่าสุด",
+    priceCount: "รายการ",
     pricesTab: "ราคา",
     purchasesTab: "การซื้อ",
     imagesTab: "รูปภาพ",
@@ -142,6 +149,15 @@ export const th: Translations = {
     joinButton: "เข้าร่วม",
     joinSuccess: "เข้าร่วมครัวเรือนสำเร็จ กรุณาล็อกอินใหม่เพื่ออัปเดตเซสชัน",
     joinError: "รหัสเชิญไม่ถูกต้องหรือหมดอายุแล้ว",
+  },
+  shoppingList: {
+    title: "รายการช็อปปิ้ง",
+    subtitle: "รายการ",
+    clearChecked: "ล้างรายการที่เลือก",
+    noData: "ยังไม่มีสินค้า — เพิ่มจากหน้าสินค้า",
+    cheapestAt: "ถูกที่สุดที่",
+    noPrice: "ยังไม่มีราคา",
+    inCart: "ในตะกร้า",
   },
   auth: {
     login: "เข้าสู่ระบบ",

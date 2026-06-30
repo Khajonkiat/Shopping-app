@@ -128,6 +128,25 @@ func (h *AuthHandler) UpdateMe(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
 }
 
+func (h *AuthHandler) Refresh(c *gin.Context) {
+	userID, _ := c.Get(middleware.UserIDKey)
+	uid, _ := userID.(uint)
+
+	user, err := h.svc.GetByID(uid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	token, err := h.makeToken(user.ID, user.Email, user.Username, user.Role, user.HouseholdID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
+}
+
 func (h *AuthHandler) makeToken(userID uint, email, username, role string, householdID uint) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id":      userID,

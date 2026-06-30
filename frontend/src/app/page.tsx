@@ -6,6 +6,7 @@ import type { Product, Purchase, Store } from "@/lib/types";
 import Link from "next/link";
 import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
+import { SkeletonDashboard } from "@/components/skeleton";
 
 function monthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -59,13 +60,7 @@ export default function Dashboard() {
     : null;
   const monthlyRows = Object.entries(byMonth).sort(([a], [b]) => b.localeCompare(a));
 
-  if (!ready || loading) {
-    return (
-      <div className="flex items-center justify-center h-48">
-        <p className="text-[#a0907c] text-sm">{t.common.loading}</p>
-      </div>
-    );
-  }
+  if (!ready || loading) return <SkeletonDashboard />;
 
   return (
     <div className="space-y-10">

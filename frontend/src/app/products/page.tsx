@@ -2,22 +2,25 @@
 import { useEffect, useState } from "react";
 import { api, imageUrl } from "@/lib/api";
 import { card, editCard, inputCls, btnPrimary, btnSecondary, th, td, labelCls } from "@/lib/styles";
-import type { Product, ProductImage } from "@/lib/types";
+import type { PriceEntry, Product, ProductImage } from "@/lib/types";
 import Link from "next/link";
 import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { Toast } from "@/components/toast";
-import { Spinner } from "@/components/spinner";
+import { SkeletonProducts } from "@/components/skeleton";
 import { useToast } from "@/lib/use-toast";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { useSearchPagination } from "@/lib/use-search-pagination";
+import { Pagination } from "@/components/pagination";
 
 const emptyForm = { name: "", category: "", unit: "", description: "" };
 
 export default function ProductsPage() {
   const { t } = useLocale();
   const { ready } = useRequireAuth();
-  const { message: toastMsg, toast, dismiss } = useToast();
+  const { message: toastMsg, toastType, toast, dismiss } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
+  const [allPrices, setAllPrices] = useState<PriceEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -33,11 +36,31 @@ export default function ProductsPage() {
 
   useEffect(() => {
     if (!ready) return;
-    api.products.list()
-      .then(setProducts)
+    Promise.all([api.products.list(), api.prices.listAll()])
+      .then(([prods, prices]) => { setProducts(prods); setAllPrices(prices); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [ready]);
+
+  // Per-product: [0] = latest, [1] = previous (API returns DESC)
+  const pricesByProduct = new Map<number, PriceEntry[]>();
+  for (const e of allPrices) {
+    const arr = pricesByProduct.get(e.product_id) ?? [];
+    arr.push(e);
+    pricesByProduct.set(e.product_id, arr);
+  }
+
+  function priceIndicator(productId: number): { price: number; delta: number | null } | null {
+    const entries = pricesByProduct.get(productId);
+    if (!entries?.length) return null;
+    const latest = entries[0];
+    const prev = entries[1];
+    const delta =
+      prev && prev.store_id === latest.store_id
+        ? ((latest.price - prev.price) / prev.price) * 100
+        : null;
+    return { price: latest.price, delta };
+  }
 
   function set(field: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -133,22 +156,37 @@ export default function ProductsPage() {
     toast(t.common.toastDeleted);
   }
 
+  const { query, setQuery, slice: visibleProducts, page, setPage, totalPages, from, to, total } =
+    useSearchPagination(
+      products,
+      (p, q) => p.name.toLowerCase().includes(q) || (p.category ?? "").toLowerCase().includes(q),
+      20
+    );
+
   if (!ready) return null;
-  if (loading) return <Spinner />;
+  if (loading) return <SkeletonProducts />;
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[#1a1208]">{t.products.title}</h1>
-          <p className="text-sm text-[#7a6858] mt-1">{products.length} {t.products.recordsSuffix}</p>
+      <div className="space-y-3">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-[#1a1208]">{t.products.title}</h1>
+            <p className="text-sm text-[#7a6858] mt-1">{products.length} {t.products.recordsSuffix}</p>
+          </div>
+          <button
+            className={showForm ? btnSecondary : btnPrimary}
+            onClick={() => { setShowForm((v) => !v); cancelEdit(); }}
+          >
+            {showForm ? t.common.cancel : t.products.addButton}
+          </button>
         </div>
-        <button
-          className={showForm ? btnSecondary : btnPrimary}
-          onClick={() => { setShowForm((v) => !v); cancelEdit(); }}
-        >
-          {showForm ? t.common.cancel : t.products.addButton}
-        </button>
+        <input
+          className={inputCls}
+          placeholder={t.common.search}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
       </div>
 
       {showForm && (
@@ -271,70 +309,96 @@ export default function ProductsPage() {
         </div>
       )}
 
-      <div className={`${card} overflow-hidden`}>
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
-              <th className={th} />
-              <th className={th}>{t.common.name}</th>
-              <th className={th}>{t.common.category}</th>
-              <th className={th}>{t.common.unit}</th>
-              <th className={th} />
-            </tr>
-          </thead>
-          <tbody>
-            {products.length === 0 ? (
-              <tr key="empty">
-                <td colSpan={5} className="px-4 py-16 text-center">
-                  <p className="text-[#a0907c] text-sm">{t.products.noData}</p>
-                </td>
+      <div className={card}>
+        <div className="overflow-hidden rounded-2xl">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
+                <th className={th} />
+                <th className={th}>{t.common.name}</th>
+                <th className={th}>{t.common.category}</th>
+                <th className={th}>{t.common.unit}</th>
+                <th className={th}>{t.common.price}</th>
+                <th className={th} />
               </tr>
-            ) : products.map((p) => {
-              const thumb = p.images?.[0];
-              return (
-              <tr key={String(p.id)} className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${editingId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
-                <td className="px-3 py-2 w-12">
-                  <Link href={`/products/${p.id}`}>
-                    {thumb ? (
-                      <img
-                        src={imageUrl(thumb.filename)}
-                        alt=""
-                        className="w-10 h-10 rounded-lg object-cover border border-[#d9cfc3]"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-[#eddccc] border border-[#d9cfc3] flex items-center justify-center">
-                        <svg className="w-4 h-4 text-[#c4b5a5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 3h18M3 21h18" />
-                        </svg>
-                      </div>
-                    )}
-                  </Link>
-                </td>
-                <td className={`${td} font-medium`}>
-                  <Link href={`/products/${p.id}`} className="text-[#1a1208] hover:text-[#b07040] transition-colors">
-                    {p.name}
-                  </Link>
-                </td>
-                <td className={`${td} text-[#7a6858]`}>{p.category || <span className="text-[#c4b5a5]">—</span>}</td>
-                <td className={`${td} text-[#7a6858]`}>{p.unit || <span className="text-[#c4b5a5]">—</span>}</td>
-                <td className={`${td} text-right`}>
-                  <div className="flex items-center justify-end gap-3">
-                    <button
-                      onClick={() => editingId === p.id ? cancelEdit() : startEdit(p)}
-                      className={`text-xs font-medium transition-colors ${editingId === p.id ? "text-[#b07040]" : "text-[#a0907c] hover:text-[#b07040]"}`}
-                    >
-                      {editingId === p.id ? t.common.cancel : t.common.edit}
-                    </button>
-                    <button onClick={() => setPendingDeleteId(p.id)} className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors">
-                      {t.common.delete}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              );
-            })}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {visibleProducts.length === 0 ? (
+                <tr key="empty">
+                  <td colSpan={5} className="px-4 py-16 text-center">
+                    <p className="text-[#a0907c] text-sm">{query ? t.common.noResults : t.products.noData}</p>
+                  </td>
+                </tr>
+              ) : visibleProducts.map((p) => {
+                const thumb = p.images?.[0];
+                return (
+                <tr key={String(p.id)} className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${editingId === p.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
+                  <td className="px-3 py-2 w-12">
+                    <Link href={`/products/${p.id}`}>
+                      {thumb ? (
+                        <img
+                          src={imageUrl(thumb.filename)}
+                          alt=""
+                          className="w-10 h-10 rounded-lg object-cover border border-[#d9cfc3]"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-[#eddccc] border border-[#d9cfc3] flex items-center justify-center">
+                          <svg className="w-4 h-4 text-[#c4b5a5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 3h18M3 21h18" />
+                          </svg>
+                        </div>
+                      )}
+                    </Link>
+                  </td>
+                  <td className={`${td} font-medium`}>
+                    <Link href={`/products/${p.id}`} className="text-[#1a1208] hover:text-[#b07040] transition-colors">
+                      {p.name}
+                    </Link>
+                  </td>
+                  <td className={`${td} text-[#7a6858]`}>{p.category || <span className="text-[#c4b5a5]">—</span>}</td>
+                  <td className={`${td} text-[#7a6858]`}>{p.unit || <span className="text-[#c4b5a5]">—</span>}</td>
+                  <td className={td}>
+                    {(() => {
+                      const ind = priceIndicator(p.id);
+                      if (!ind) return <span className="text-[#c4b5a5] text-sm">—</span>;
+                      return (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm font-semibold text-[#1a1208]">฿{ind.price.toFixed(2)}</span>
+                          {ind.delta !== null && (
+                            <span className={`inline-flex items-center text-xs font-semibold px-1.5 py-0.5 rounded-full ${
+                              ind.delta < 0
+                                ? "bg-emerald-50 text-emerald-700"
+                                : ind.delta > 0
+                                ? "bg-rose-50 text-rose-700"
+                                : "bg-[#f0ece8] text-[#a0907c]"
+                            }`}>
+                              {ind.delta < 0 ? "▼" : "▲"} {Math.abs(ind.delta).toFixed(0)}%
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </td>
+                  <td className={`${td} text-right`}>
+                    <div className="flex items-center justify-end gap-3">
+                      <button
+                        onClick={() => editingId === p.id ? cancelEdit() : startEdit(p)}
+                        className={`text-xs font-medium transition-colors ${editingId === p.id ? "text-[#b07040]" : "text-[#a0907c] hover:text-[#b07040]"}`}
+                      >
+                        {editingId === p.id ? t.common.cancel : t.common.edit}
+                      </button>
+                      <button onClick={() => setPendingDeleteId(p.id)} className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors">
+                        {t.common.delete}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <Pagination page={page} totalPages={totalPages} from={from} to={to} total={total} onPage={setPage} />
       </div>
 
       {pendingDeleteId !== null && (
@@ -346,7 +410,7 @@ export default function ProductsPage() {
           onCancel={() => setPendingDeleteId(null)}
         />
       )}
-      {toastMsg && <Toast message={toastMsg} onDismiss={dismiss} />}
+      {toastMsg && <Toast message={toastMsg} type={toastType} onDismiss={dismiss} />}
     </div>
   );
 }

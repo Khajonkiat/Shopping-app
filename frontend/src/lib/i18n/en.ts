@@ -8,6 +8,7 @@ export const en: Translations = {
     purchases: "Purchases",
     household: "Household",
     users: "Users",
+    shoppingList: "Shopping List",
   },
   admin: {
     title: "User Management",
@@ -53,6 +54,9 @@ export const en: Translations = {
     baseUrl: "Base URL",
     selectStore: "Select store",
     selectProduct: "Select product",
+    search: "Search…",
+    noResults: "No results.",
+    rename: "Rename",
     toastSaved: "Saved!",
     toastUpdated: "Updated!",
     toastDeleted: "Deleted!",
@@ -93,6 +97,9 @@ export const en: Translations = {
   productDetail: {
     back: "← Products",
     cheapest: "cheapest",
+    priceComparison: "Price comparison",
+    lastRecorded: "Last recorded",
+    priceCount: "Entries",
     pricesTab: "prices",
     purchasesTab: "purchases",
     imagesTab: "images",
@@ -142,6 +149,15 @@ export const en: Translations = {
     joinButton: "Join",
     joinSuccess: "Joined household successfully. Please log in again to refresh your session.",
     joinError: "Invalid or expired invite code.",
+  },
+  shoppingList: {
+    title: "Shopping List",
+    subtitle: "items",
+    clearChecked: "Clear checked",
+    noData: "No products yet — add some from the Products page.",
+    cheapestAt: "Cheapest at",
+    noPrice: "No price recorded",
+    inCart: "In cart",
   },
   auth: {
     login: "Log in",

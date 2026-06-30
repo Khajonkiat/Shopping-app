@@ -53,6 +53,7 @@ export const api = {
         method: "PATCH",
         body: JSON.stringify(data),
       }),
+    refresh: () => request<AuthResponse>("/auth/refresh", { method: "POST" }),
   },
 
   products: {
@@ -90,6 +91,7 @@ export const api = {
   },
 
   prices: {
+    listAll: () => request<PriceEntry[]>("/prices"),
     create: (data: Partial<PriceEntry>) =>
       request<PriceEntry>("/prices", {
         method: "POST",
@@ -122,6 +124,11 @@ export const api = {
 
   household: {
     get: () => request<Household>("/household"),
+    rename: (name: string) =>
+      request<Household>("/household", {
+        method: "PATCH",
+        body: JSON.stringify({ name }),
+      }),
     generateInvite: () => request<HouseholdInvite>("/household/invite", { method: "POST" }),
     join: (code: string) =>
       request<Household>("/household/join", {

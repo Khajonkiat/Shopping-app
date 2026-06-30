@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { api } from "./api";
 
 const TOKEN_KEY = "auth_token";
 
@@ -61,6 +62,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (parsed) {
         setToken(stored);
         setUser(parsed);
+        // Silently extend session when < 24 h remain on the 7-day token.
+        try {
+          const { exp } = JSON.parse(atob(stored.split(".")[1]));
+          if (exp * 1000 - Date.now() < 24 * 60 * 60 * 1000) {
+            api.auth.refresh().then(({ token: t, user: u }) => {
+              localStorage.setItem(TOKEN_KEY, t);
+              setToken(t);
+              setUser({ id: u.id, email: u.email, username: u.username, role: u.role as UserRole, household_id: u.household_id });
+            }).catch(() => {});
+          }
+        } catch { /* ignore malformed payload */ }
       } else {
         localStorage.removeItem(TOKEN_KEY);
       }

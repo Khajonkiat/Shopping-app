@@ -6,9 +6,11 @@ import type { Store } from "@/lib/types";
 import { useLocale } from "@/components/locale-provider";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { Toast } from "@/components/toast";
-import { Spinner } from "@/components/spinner";
+import { SkeletonStores } from "@/components/skeleton";
 import { useToast } from "@/lib/use-toast";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { useSearchPagination } from "@/lib/use-search-pagination";
+import { Pagination } from "@/components/pagination";
 
 const emptyForm = { name: "", base_url: "" };
 
@@ -70,22 +72,37 @@ export default function StoresPage() {
     toast(t.common.toastDeleted);
   }
 
+  const { query, setQuery, slice: visibleStores, page, setPage, totalPages, from, to, total } =
+    useSearchPagination(
+      stores,
+      (s, q) => s.name.toLowerCase().includes(q) || (s.base_url ?? "").toLowerCase().includes(q),
+      20
+    );
+
   if (!ready) return null;
-  if (loading) return <Spinner />;
+  if (loading) return <SkeletonStores />;
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[#1a1208]">{t.stores.title}</h1>
-          <p className="text-sm text-[#7a6858] mt-1">{stores.length} {t.stores.recordsSuffix}</p>
+      <div className="space-y-3">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-[#1a1208]">{t.stores.title}</h1>
+            <p className="text-sm text-[#7a6858] mt-1">{stores.length} {t.stores.recordsSuffix}</p>
+          </div>
+          <button
+            className={showForm ? btnSecondary : btnPrimary}
+            onClick={() => { setShowForm((v) => !v); cancelEdit(); }}
+          >
+            {showForm ? t.common.cancel : t.stores.addButton}
+          </button>
         </div>
-        <button
-          className={showForm ? btnSecondary : btnPrimary}
-          onClick={() => { setShowForm((v) => !v); cancelEdit(); }}
-        >
-          {showForm ? t.common.cancel : t.stores.addButton}
-        </button>
+        <input
+          className={inputCls}
+          placeholder={t.common.search}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
       </div>
 
       {showForm && (
@@ -140,48 +157,53 @@ export default function StoresPage() {
         </div>
       )}
 
-      <div className={`${card} overflow-hidden`}>
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
-              <th className={th}>{t.common.name}</th>
-              <th className={th}>{t.common.baseUrl}</th>
-              <th className={th} />
-            </tr>
-          </thead>
-          <tbody>
-            {stores.length === 0 ? (
-              <tr key="empty">
-                <td colSpan={3} className="px-4 py-16 text-center text-[#a0907c] text-sm">{t.stores.noData}</td>
+      <div className={card}>
+        <div className="overflow-hidden rounded-2xl">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[#d9cfc3] bg-[#f0e7d8]">
+                <th className={th}>{t.common.name}</th>
+                <th className={th}>{t.common.baseUrl}</th>
+                <th className={th} />
               </tr>
-            ) : stores.map((s) => (
-              <tr key={String(s.id)} className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${editingId === s.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
-                <td className={`${td} font-medium text-[#1a1208]`}>{s.name}</td>
-                <td className={td}>
-                  {s.base_url ? (
-                    <a href={s.base_url} target="_blank" rel="noreferrer"
-                      className="text-xs text-[#b07040] hover:text-[#8f5a32] hover:underline transition-colors">
-                      {s.base_url}
-                    </a>
-                  ) : <span className="text-[#c4b5a5] text-sm">—</span>}
-                </td>
-                <td className={`${td} text-right`}>
-                  <div className="flex items-center justify-end gap-3">
-                    <button
-                      onClick={() => editingId === s.id ? cancelEdit() : startEdit(s)}
-                      className={`text-xs font-medium transition-colors ${editingId === s.id ? "text-[#b07040]" : "text-[#a0907c] hover:text-[#b07040]"}`}
-                    >
-                      {editingId === s.id ? t.common.cancel : t.common.edit}
-                    </button>
-                    <button onClick={() => setPendingDeleteId(s.id)} className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors">
-                      {t.common.delete}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {visibleStores.length === 0 ? (
+                <tr key="empty">
+                  <td colSpan={3} className="px-4 py-16 text-center text-[#a0907c] text-sm">
+                    {query ? t.common.noResults : t.stores.noData}
+                  </td>
+                </tr>
+              ) : visibleStores.map((s) => (
+                <tr key={String(s.id)} className={`border-b border-[#e8dfd5] last:border-0 transition-colors ${editingId === s.id ? "bg-[#f7f0e8]" : "hover:bg-[#fdf9f5]"}`}>
+                  <td className={`${td} font-medium text-[#1a1208]`}>{s.name}</td>
+                  <td className={td}>
+                    {s.base_url ? (
+                      <a href={s.base_url} target="_blank" rel="noreferrer"
+                        className="text-xs text-[#b07040] hover:text-[#8f5a32] hover:underline transition-colors">
+                        {s.base_url}
+                      </a>
+                    ) : <span className="text-[#c4b5a5] text-sm">—</span>}
+                  </td>
+                  <td className={`${td} text-right`}>
+                    <div className="flex items-center justify-end gap-3">
+                      <button
+                        onClick={() => editingId === s.id ? cancelEdit() : startEdit(s)}
+                        className={`text-xs font-medium transition-colors ${editingId === s.id ? "text-[#b07040]" : "text-[#a0907c] hover:text-[#b07040]"}`}
+                      >
+                        {editingId === s.id ? t.common.cancel : t.common.edit}
+                      </button>
+                      <button onClick={() => setPendingDeleteId(s.id)} className="text-xs font-medium text-[#a0907c] hover:text-rose-500 transition-colors">
+                        {t.common.delete}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <Pagination page={page} totalPages={totalPages} from={from} to={to} total={total} onPage={setPage} />
       </div>
 
       {pendingDeleteId !== null && (
